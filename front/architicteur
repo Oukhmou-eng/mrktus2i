@@ -1,0 +1,83 @@
+le-panier-front/
+├── public/
+├── src/
+│   ├── main.jsx
+│   ├── App.jsx
+│   │
+│   ├── router/
+│   │   ├── AppRouter.jsx          # toutes les routes
+│   │   └── ProtectedRoute.jsx     # garde d'accès selon role (client / vendeur / admin)
+│   │
+│   ├── layouts/
+│   │   ├── PublicLayout.jsx       # navbar + footer publics
+│   │   ├── CompteLayout.jsx       # sidebar "Mon compte"
+│   │   └── VendeurLayout.jsx      # sidebar "Espace vendeur"
+│   │
+│   ├── pages/
+│   │   ├── public/
+│   │   │   ├── Home.jsx                 # index.html
+│   │   │   ├── Catalogue.jsx            # catalogue.html
+│   │   │   ├── Produit.jsx              # produit.html
+│   │   │   ├── Boutiques.jsx            # boutiques.html
+│   │   │   ├── Boutique.jsx             # boutique.html
+│   │   │   ├── Panier.jsx               # panier.html
+│   │   │   ├── Connexion.jsx            # connexion.html
+│   │   │   └── Support.jsx              # support.html
+│   │   │
+│   │   ├── compte/
+│   │   │   ├── Commandes.jsx            # -> COMMANDES
+│   │   │   ├── SuiviCommande.jsx        # -> COMMANDES + COMMANDE_LIGNES
+│   │   │   ├── Favoris.jsx              # -> FAVORIS
+│   │   │   ├── BoutiquesSuivies.jsx     # -> BOUTIQUES_SUIVIES
+│   │   │   ├── Messages.jsx             # -> CONVERSATIONS / MESSAGES
+│   │   │   ├── Notifications.jsx        # -> NOTIFICATIONS
+│   │   │   └── Parametres.jsx           # -> UTILISATEURS / ADRESSES / MOYENS_PAIEMENT
+│   │   │
+│   │   └── vendeur/
+│   │       ├── Dashboard.jsx
+│   │       ├── MesProduits.jsx          # -> PRODUITS
+│   │       ├── PublierProduit.jsx       # -> PRODUITS / PRODUIT_MEDIAS
+│   │       ├── Stock.jsx                # -> PRODUITS.stock
+│   │       ├── Categories.jsx           # -> CATEGORIES
+│   │       ├── CommandesRecues.jsx      # -> COMMANDE_LIGNES
+│   │       ├── Paiements.jsx            # -> PAIEMENTS
+│   │       ├── Revenus.jsx              # -> REVENUS_VENDEUR
+│   │       ├── Publicites.jsx           # -> PUBLICITES
+│   │       ├── Statistiques.jsx
+│   │       ├── AvisClients.jsx          # -> AVIS
+│   │       ├── Messages.jsx
+│   │       ├── Notifications.jsx
+│   │       └── Parametres.jsx           # -> BOUTIQUES
+│   │
+│   ├── components/
+│   │   ├── common/          # Navbar, Footer, Button, Modal, Pagination, SearchBar, Loader
+│   │   ├── produit/         # ProductCard, ProductGallery, ProductReviews
+│   │   ├── boutique/        # BoutiqueCard, BoutiqueHeader, FollowButton
+│   │   ├── panier/          # CartItem, CartSummary
+│   │   ├── compte/          # OrderRow, SidebarCompte
+│   │   └── vendeur/         # SidebarVendeur, StatCard, RevenueTable
+│   │
+│   ├── services/            # un fichier par ressource API (aligné sur les tables)
+│   │   ├── api.js           # instance axios/fetch + interceptors (JWT)
+│   │   ├── authService.js
+│   │   ├── produitService.js
+│   │   ├── boutiqueService.js
+│   │   ├── commandeService.js
+│   │   ├── paiementService.js
+│   │   ├── messageService.js
+│   │   ├── notificationService.js
+│   │   └── avisService.js
+│   │
+│   ├── store/                # état global (Zustand ou Redux Toolkit)
+│   │   ├── authStore.js
+│   │   ├── cartStore.js
+│   │   └── notificationStore.js
+│   │
+│   ├── hooks/                # useAuth, useCart, useFetch, usePagination
+│   ├── context/               # si Context API préféré à Zustand
+│   ├── utils/                 # formatPrice, formatDate, validators
+│   ├── assets/
+│   └── styles/                # variables.css, global.css + un .css/.module.css par page (repris de vos fichiers existants)
+│
+├── package.json
+└── vite.config.js

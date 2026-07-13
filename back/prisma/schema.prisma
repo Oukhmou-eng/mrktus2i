@@ -1,0 +1,11 @@
+﻿generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// TODO: coller ici les 25 modeles issus du script SQL
+// (UTILISATEURS, ADRESSES, BOUTIQUES, CATEGORIES, PRODUITS, ...)
