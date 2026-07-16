@@ -1,19 +1,24 @@
 ﻿import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCategorieDto } from './dto/create-categorie.dto';
+import { DatabaseService } from '../../database/database.service'; 
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly prisma: PrismaService) {}
-
+  constructor(private readonly db: DatabaseService) {}
   create(dto: CreateCategorieDto) {
     // TODO: this.prisma.categories.create({ data: dto })
     return dto;
   }
 
-  findAll() {
-    // TODO: this.prisma.categories.findMany()
-    return [];
+ async findAll() {
+    const categories = await this.db.query(
+      'SELECT * FROM categories'
+    ) as any[];
+    if (categories.length === 0) {
+      return { error: 'Aucune catégorie trouvée' };
+    }
+
+    return categories.map((cat: any) => cat.nom);
   }
 
   findOne(id: number) {
@@ -31,3 +36,6 @@ export class CategoriesService {
     return { id };
   }
 }
+
+
+

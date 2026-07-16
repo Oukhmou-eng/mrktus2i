@@ -1,9 +1,9 @@
 ﻿import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import databaseConfig from './config/database.config';
-import jwtConfig from './config/jwt.config';
-import { PrismaModule } from './prisma/prisma.module';
 
+import jwtConfig from './config/jwt.config';
+
+import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UtilisateursModule } from './modules/utilisateurs/utilisateurs.module';
 import { BoutiquesModule } from './modules/boutiques/boutiques.module';
@@ -19,14 +19,16 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { PromotionsModule } from './modules/promotions/promotions.module';
 import { RevenusModule } from './modules/revenus/revenus.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { HomeModule } from './modules/home/home.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, jwtConfig],
+      load: [jwtConfig],
     }),
-    PrismaModule,
+    
+    DatabaseModule,
     AuthModule,
     UtilisateursModule,
     BoutiquesModule,
@@ -42,6 +44,7 @@ import { AdminModule } from './modules/admin/admin.module';
     PromotionsModule,
     RevenusModule,
     AdminModule,
+    HomeModule,
   ],
 })
 export class AppModule {}

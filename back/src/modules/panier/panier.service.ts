@@ -1,10 +1,8 @@
 ﻿import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePanierItemDto } from './dto/create-panier-item.dto';
 
 @Injectable()
 export class PanierService {
-  constructor(private readonly prisma: PrismaService) {}
 
   create(dto: CreatePanierItemDto) {
     // TODO: this.prisma.panier.create({ data: dto })

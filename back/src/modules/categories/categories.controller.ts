@@ -10,6 +10,7 @@ export class CategoriesController {
   create(@Body() dto: CreateCategorieDto) {
     return this.categoriesService.create(dto);
   }
+  
 
   @Get()
   findAll() {

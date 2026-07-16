@@ -1,10 +1,8 @@
 ﻿import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSignalementDto } from './dto/create-signalement.dto';
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
 
   create(dto: CreateSignalementDto) {
     // TODO: this.prisma.admin.create({ data: dto })

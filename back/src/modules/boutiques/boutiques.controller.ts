@@ -6,9 +6,9 @@ import { CreateBoutiqueDto } from './dto/create-boutique.dto';
 export class BoutiquesController {
   constructor(private readonly boutiquesService: BoutiquesService) {}
 
-  @Post()
-  create(@Body() dto: CreateBoutiqueDto) {
-    return this.boutiquesService.create(dto);
+  @Post('trie')
+  create(@Body()  body: any) {
+    return this.boutiquesService.trie(body.Vtrie);
   }
 
   @Get()
@@ -16,9 +16,14 @@ export class BoutiquesController {
     return this.boutiquesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.boutiquesService.findOne(+id);
+  @Post('search')
+  search(@Body() body: any) {
+    return this.boutiquesService.search(body.search);
+  }
+
+  @Post('detail')
+  findOne(@Body() body: any) {
+    return this.boutiquesService.findOne(body.id);
   }
 
   @Patch(':id')

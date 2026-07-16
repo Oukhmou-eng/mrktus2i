@@ -1,0 +1,15 @@
+import { Controller, Post,Get, Body, UseGuards, Request } from '@nestjs/common';
+import { HomeService } from './home.service';
+
+@Controller('home')
+export class HomeController {
+
+constructor(private readonly homeService: HomeService) {}
+
+
+@Get()
+  getHomeData() {
+    return this.homeService.getHomeData();
+  }
+
+}

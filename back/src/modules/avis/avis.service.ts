@@ -1,10 +1,10 @@
 ﻿import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { DatabaseService } from '../../database/database.service';
 import { CreateAvisDto } from './dto/create-avis.dto';
 
 @Injectable()
 export class AvisService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly database: DatabaseService) {}
 
   create(dto: CreateAvisDto) {
     // TODO: this.prisma.avis.create({ data: dto })

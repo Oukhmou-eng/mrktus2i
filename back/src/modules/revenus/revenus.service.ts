@@ -1,10 +1,8 @@
 ﻿import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { CreateRevenuDto } from './dto/create-revenu.dto';
 
 @Injectable()
 export class RevenusService {
-  constructor(private readonly prisma: PrismaService) {}
 
   create(dto: CreateRevenuDto) {
     // TODO: this.prisma.revenus.create({ data: dto })
