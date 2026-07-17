@@ -8,10 +8,17 @@ function Boutique(){
   const { id } = useParams();
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [ModalAvis, setModalAvis] = useState(false);
+  const [note, setNote] = useState(5);
+const [commentaire, setCommentaire] = useState("");
+
   const [afficherTousProduits, setAfficherTousProduits] = useState(true);
 
   const [boutique, setBoutique] = useState(null);
   const [produits, setProduits] = useState([]);
+  const [avis, setAvis] = useState([]);
+  const [motif, setMotif] = useState("");
+  const [description, setDescription] = useState(""); 
 
   useEffect(() => {
     const chargerBoutique = async () => {
@@ -39,6 +46,66 @@ function Boutique(){
 
     chargerBoutique();
   }, [id]);
+
+const handleGetA = async () => {
+    try {
+      const res = await fetch(`http://localhost:3000/boutiques/${id}/avis`);
+      const data = await res.json();
+      setAvis(data?.avis ?? []); 
+      
+    } catch (error) {
+      console.error('An error ', error);
+    }
+  }
+
+  useEffect(() => { handleGetA(); }, [id]); 
+
+
+
+const handleAjouterAvis = async () => { 
+     try {
+        const res = await fetch(`http://localhost:3000/boutiques/${id}/avis`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id, note, commentaire }),
+        });
+
+        const data = await res.json();
+        console.log("Avis ajouté:", data);
+        setNote(5); // Réinitialiser la note à 5 étoiles
+        setCommentaire("");
+        handleGetA(); // Rafraîchir la liste des avis après l'ajout
+
+      } catch (error) {
+        console.error(error);
+      }
+}
+    
+
+
+
+
+ const SignalerBoutique = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/boutiques/signale", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id, motif, description}),
+          
+        });
+        console.log("id:", id, "motif:", motif, "description:", description);
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+
+
 
   // URLs banniere/logo venant des données de la boutique renvoyées par le backend
   const bannerUrl = boutique?.banniere_url || "";
@@ -72,16 +139,22 @@ function Boutique(){
   const afficherP = () => {
     setAfficherTousProduits(true);
     setModalOpen(false);
+    setModalAvis(false);
   }
 
   const ouvrirModal = () => {
-    if (!modalOpen) {
+    
       setModalOpen(true);
       setAfficherTousProduits(false);
-    } else {
+      setModalAvis(false);
+   
+  }
+  const ouvrirModalAvis = () => {
+    
+      setModalAvis(true);
+      setAfficherTousProduits(false);
       setModalOpen(false);
-      setAfficherTousProduits(true);
-    }
+   
   }
 
   const fermerModal = () => { setModalOpen(false); setAfficherTousProduits(true); }
@@ -122,12 +195,13 @@ function Boutique(){
     <div>{produits.length}<span>Produits</span></div>
     <div>2.4k<span>Ventes</span></div>
     <div>98%<span>Satisfaction</span></div>
-    <div>2022<span>Sur Le Panier</span></div>
+    <div>{new Date(boutique?.date_creation).getFullYear()}
+<span>Sur Le Panier</span></div>
   </div>
 
   <div className="tabs">
     <button className="btn-report" onClick={() => afficherP()} >Produits</button>
-    <button className="btn-report" onClick={() => ouvrirModal()} >Avis (128)</button>
+    <button className="btn-report" onClick={() => ouvrirModalAvis()} >Avis ({avis.length})</button>
     <button className="btn-report" onClick={() => ouvrirModal()} >⚑ Signaler</button>
   </div>
 
@@ -163,65 +237,172 @@ function Boutique(){
   </div>
    )} </>
 
-  <div  style={{ display: 'none' }}>
+  
+
+
+
+  <>
+  {ModalAvis && (<div className="reviews-section">
+
+    {/* ================= Ajouter un avis ================= */}
+
+    <div className="add-review-card">
+
+        <h3>Laisser votre avis</h3>
+
+        <div className="star-picker">
+
+            {[1,2,3,4,5].map((star)=>(
+
+                <span
+                    key={star}
+                    className={star<=note ? "active" : ""}
+                    onClick={()=>setNote(star)}
+                >
+                    ★
+                </span>
+
+            ))}
+
+        </div>
+
+        <div className="field">
+
+            <label>Votre commentaire</label>
+
+            <textarea
+                value={commentaire}
+                onChange={(e)=>setCommentaire(e.target.value)}
+                placeholder="Partagez votre expérience avec cette boutique..."
+            />
+
+        </div>
+
+        <div className="add-review-actions">
+
+            <button
+                className="btn teal"
+                onClick={handleAjouterAvis}
+            >
+                Publier l'avis
+            </button>
+
+        </div>
+
+    </div>
+
+
+    {/* ================= Résumé ================= */}
 
     <div className="reviews-summary">
-      <div>
-        <div className="score">4.8</div>
-        <div className="score-sub">sur 5</div>
-      </div>
-      <div>
-        <div className="stars-big">★★★★★</div>
-        <div className="score-sub">128 avis</div>
-      </div>
-      <div style={{ marginLeft: 'auto' }}>
-        <button className="btn teal">✎ Laisser un avis</button>
-      </div>
+
+        <div>
+
+            <div className="score">
+                {boutique?.note_moyenne ?? "0.0"}
+            </div>
+
+            <div className="score-sub">
+                sur 5
+            </div>
+
+        </div>
+
+        <div>
+
+            <div className="stars-big">
+
+                {"★".repeat(Math.round(boutique?.note_moyenne || 0))}
+                {"☆".repeat(5-Math.round(boutique?.note_moyenne || 0))}
+
+            </div>
+
+            <div className="score-sub">
+
+                {avis.length} avis
+
+            </div>
+
+        </div>
+
     </div>
 
-    <div className="add-review-card" >
-      <h3>Votre avis sur SoundStore</h3>
-      <div className="star-picker" >
-        <span data-star="1">★</span>
-        <span data-star="2">★</span>
-        <span data-star="3">★</span>
-        <span data-star="4">★</span>
-        <span data-star="5">★</span>
-      </div>
-      <div className="field">
-        <label>Votre commentaire</label>
-        <textarea  placeholder="Décrivez votre expérience avec cette boutique…"></textarea>
-      </div>
-      <div className="add-review-actions">
-        <button className="btn teal" id="submitReviewBtn">Publier l'avis</button>
-        <button className="btn outline" id="cancelReviewBtn">Annuler</button>
-      </div>
+
+    {/* ================= Liste ================= */}
+
+    <div className="reviews-list">
+
+        {
+            avis.length===0 ?
+
+            <div className="no-review">
+
+                Aucun avis pour cette boutique.
+
+            </div>
+
+            :
+
+            avis.map((item,index)=>(
+
+                <div
+                    className="review"
+                    key={index}
+                >
+
+                    <div className="avatar">
+
+                        {
+                            item.logo_url &&
+                            <img
+                                src={item.logo_url}
+                                alt=""
+                            />
+                        }
+
+                    </div>
+
+                    <div className="review-content">
+
+                        <div className="review-header">
+
+                            <span className="review-user">
+
+                                {item.prenom} {item.nom}
+
+                            </span>
+
+                            <span className="stars">
+
+                                {"★".repeat(item.note)}
+                                {"☆".repeat(5-item.note)}
+
+                            </span>
+
+                        </div>
+
+                        <p>
+
+                            {item.commentaire}
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            ))
+        }
+
     </div>
 
-    <div id="reviewsList">
-      <div className="review">
-        <div className="avatar"></div>
-        <div>
-          <div className="stars">★★★★★<span className="date">Yasmine B. · il y a 3 jours</span></div>
-          <p>Très bon son pour le prix, la batterie tient vraiment 12h comme annoncé.</p>
-        </div>
-      </div>
-      <div className="review">
-        <div className="avatar"></div>
-        <div>
-          <div className="stars">★★★★☆<span className="date">Omar T. · il y a 1 semaine</span></div>
-          <p>Livraison rapide, produit conforme à la vidéo de présentation.</p>
-        </div>
-      </div>
-      <div className="review">
-        <div className="avatar"></div>
-        <div>
-          <div className="stars">★★★★★<span className="date">Sara K. · il y a 2 semaines</span></div>
-          <p>Vendeur réactif, il a répondu à mes questions avant l'achat.</p>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>) }
+  
+  
+  </>
+
+
+
 
 </main>
 
@@ -236,23 +417,21 @@ function Boutique(){
 </div>
     <p className="hint">Merci de nous indiquer la raison. Notre équipe examinera votre signalement rapidement.</p>
 
-    <label className="report-reason">
-        <input type="radio" name="reportReason" value="contrefacon"/>
-         Produits contrefaits ou non conformes</label>
-    <label className="report-reason"><input type="radio" name="reportReason" value="arnaque"/> Comportement suspect / arnaque</label>
-    <label className="report-reason"><input type="radio" name="reportReason" value="contenu"/> Contenu inapproprié</label>
-    <label className="report-reason"><input type="radio" name="reportReason" value="autre"/> Autre raison</label>
+    <label className="report-reason"> <input type="radio" name="reportReason" value="contrefacon"  onChange={(e) => setMotif(e.target.value)}  /> Produits contrefaits ou non conformes</label>
+    <label className="report-reason"><input type="radio" name="reportReason" value="arnaque"  onChange={(e) => setMotif(e.target.value)}/> Comportement suspect / arnaque</label>
+    <label className="report-reason"><input type="radio" name="reportReason" value="contenu"  onChange={(e) => setMotif(e.target.value)}/> Contenu inapproprié</label>
+    <label className="report-reason"><input type="radio" name="reportReason" value="autre"  onChange={(e) => setMotif(e.target.value)}/> Autre raison</label>
 
     <div className="field" style={{ marginTop: '12px' }}>
       <label>Précisez (facultatif)</label>
-      <textarea id="reportDetails" placeholder="Ajoutez des détails…" style={{ minHeight: '70px' }}></textarea>
+      <textarea id="reportDetails" placeholder="Ajoutez des détails…"  value={description} onChange={(e) => setDescription(e.target.value)} style={{ minHeight: '70px' }}></textarea>
     </div>
 
     <div className="modal-actions">
       <button className="btn outline" id="closeReportBtn" onClick={fermerModal}>
         Annuler
       </button>
-      <button className="btn danger-outline" id="submitReportBtn">
+      <button className="btn danger-outline" id="submitReportBtn" onClick={() => { SignalerBoutique(); fermerModal(); }}>
         Envoyer le signalement
       </button>
     </div>

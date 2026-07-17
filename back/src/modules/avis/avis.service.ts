@@ -4,11 +4,18 @@ import { CreateAvisDto } from './dto/create-avis.dto';
 
 @Injectable()
 export class AvisService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(private readonly db: DatabaseService) {}
 
-  create(dto: CreateAvisDto) {
-    // TODO: this.prisma.avis.create({ data: dto })
-    return dto;
+  async create(type_cible: string, id_cible: number, note: number, commentaire: string, id_user: number) {
+    const res = await this.db.query<any>(
+      'INSERT INTO avis (id_cible, id_user, type_cible, note, commentaire, date_creation) VALUES (?, ?, ?, ?, ?, NOW())',
+      [id_cible, id_user, type_cible, note, commentaire],
+    );
+
+    return {
+      success: true,
+      insertId: res.insertId,
+    };
   }
 
   findAll() {

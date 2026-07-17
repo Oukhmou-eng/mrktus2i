@@ -150,8 +150,8 @@ useEffect(() => {  handleCat(); }, []);
       <div className="rail-cats">
         <div className="rail-cats-list">
           <button onClick={() => {navigate('/home');} }>Accueil</button>
-          <button data-page="catalogue.html">Promotion</button>
-          <button data-page="catalogue.html">Catalogue</button>
+           <button onClick={() => {navigate('/soldes');} } >Soldes</button>
+          <button onClick={() => {navigate('/catalogue');} } >Catalogue</button>
           <button onClick={() => {navigate('/boutiques');} }>Boutique</button>
           <button data-page="support.html">Aide</button>
         </div>

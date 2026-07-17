@@ -7,8 +7,8 @@ export class AvisController {
   constructor(private readonly avisService: AvisService) {}
 
   @Post()
-  create(@Body() dto: CreateAvisDto) {
-    return this.avisService.create(dto);
+  create(@Body() body:any) {
+    return this.avisService.create(body.type_cible, body.id_cible ,body.note,body.commentaire,body.id_user );
   }
 
   @Get()

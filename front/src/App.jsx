@@ -11,7 +11,9 @@ import Home from './pages/public/Home'
 import Boutiques from './pages/public/Boutiques'
 import Boutique from './pages/public/Boutique'
 import SignaleCard from './components/signaleCard'
-
+import Catalogue from    './pages/public/Catalogue'
+import Soldes from    './pages/public/Soldes'
+import Produit from './pages/public/Produit'
 
 function App() {
 
@@ -27,9 +29,9 @@ function App() {
         <Route path="/boutiques"    element={<><Navbar/><Boutiques /></> } />
         <Route path="/boutique/:id"    element={<><Navbar/><Boutique /></> } />
         <Route path="/signaler"    element={<><Navbar/><SignaleCard /></> } />
-
-
-    
+        <Route path="/catalogue"    element={<><Navbar/><Catalogue /></> } />
+        <Route path="/soldes"    element={<><Navbar/><Soldes/></> } />
+        <Route path="/produit/:id"    element={<><Navbar/><Produit /></> } />
 
       </Routes>
    

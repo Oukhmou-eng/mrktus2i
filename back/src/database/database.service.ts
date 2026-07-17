@@ -1,9 +1,10 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { createPool, Pool } from 'mysql2/promise';
+import type { OkPacket, ResultSetHeader, RowDataPacket } from 'mysql2';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
-  private pool: Pool;
+  private pool!: Pool;
 
   async onModuleInit() {
     this.pool = createPool({
@@ -30,9 +31,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     return this.pool;
   }
 
-  async query(sql: string, params: any[] = []) {
+  async query<T = any>(sql: string, params: any[] = []): Promise<T> {
     const [rows] = await this.pool.execute(sql, params);
-    return rows;
+    return rows as unknown as T;
   }
 
   async onModuleDestroy() {

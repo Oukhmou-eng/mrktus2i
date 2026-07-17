@@ -235,4 +235,62 @@ GROUP BY
 
     return { id };
   }
+
+async signaler(id: number, motif: string, description: string) {
+  try {
+    
+    await this.db.query(
+      `
+      INSERT INTO signalements (id_user,type_cible,id_cible, motif, description, date_creation, statut)
+      VALUES (1,'boutique',?, ?, ?, NOW(), 'en_cours')
+      `,
+      [id, motif, description],
+    );
+
+return { success: true, message: 'Signalement envoyé avec succès.' };
+  }catch (error) {
+    
+    return { success: false, message: 'Une erreur est survenue lors de l\'envoi du signalement.' };
+  }
 }
+
+
+async getAvis(id: number) {
+  try {
+    const avis = await this.db.query(
+      `
+      SELECT U.nom,U.prenom,U.logo_url, A.commentaire, A.note FROM  avis A JOIN utilisateurs U ON A.id_user = U.id_user WHERE A.type_cible = 'boutique' AND A.id_cible = ?
+      `,
+      [id]
+    );
+    return { avis: avis ?? []  };
+  } catch (error) {
+    console.error('Erreur getAvis:', error);
+    return { avis: [] };
+  }
+}
+
+
+
+async ajouterAvis(id: number, note: number, commentaire: string) {
+  try {
+    await this.db.query(
+      `
+      INSERT INTO avis (id_user, type_cible, id_cible, note, commentaire, date_creation)
+      VALUES (1, 'boutique', ?, ?, ?, NOW())
+      `,
+      [id, note, commentaire]
+    );
+    return {  message: 'Avis ajouté avec succès.' };
+  } catch (error) {
+    console.error('Erreur ajouterAvis:', error);
+    return { success: false, message: 'Une erreur est survenue lors de l\'ajout de l\'avis.' };
+  }
+}
+
+
+}
+
+
+
+

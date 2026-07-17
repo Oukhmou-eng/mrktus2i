@@ -12,8 +12,14 @@ export class BoutiquesController {
   }
 
   @Get()
-  findAll() {
-    return this.boutiquesService.findAll();
+  findAll(){
+
+    return this.boutiquesService.findAll()
+  }
+
+  @Get(':id/avis')
+  getAvis(@Param('id') id: number) {
+    return this.boutiquesService.getAvis(id);
   }
 
   @Post('search')
@@ -25,6 +31,21 @@ export class BoutiquesController {
   findOne(@Body() body: any) {
     return this.boutiquesService.findOne(body.id);
   }
+
+
+@Post('signale')
+  signaler(@Body() body: any) {
+    return this.boutiquesService.signaler(body.id, body.motif, body.description);
+  }
+
+
+@Post(':id/avis')
+  ajouterAvis(@Body() body: any) {
+    return this.boutiquesService.ajouterAvis(body.id, body.note, body.commentaire);
+  }
+
+
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: Partial<CreateBoutiqueDto>) {

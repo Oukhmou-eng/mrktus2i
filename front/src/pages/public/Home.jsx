@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 
 function Home() {
 const [info, setInfo] = useState([]);
+const navigate = useNavigate();
 
  const normalizeProducts = (items) => {
   const products = Array.isArray(items)
@@ -40,7 +41,13 @@ return (
 <section className="view active" id="accueil">
       <div className="section-head">
         <h2>Produits en vedette</h2>
-        <a className="link-sub" data-page="catalogue.html">Voir le catalogue →</a>
+        <a
+  className="link-sub"
+  onClick={() => navigate("/catalogue")}
+>
+  <label>Voir le catalogue →</label> 
+</a>
+        
       </div>
       <div className="active-filters" id="homeActiveFilters" style={{ display: "none" }}></div>
       <div className="grid" id="homeGrid">

@@ -1,0 +1,94 @@
+/* ---- Layout général utilisé par la page ---- */
+.main{ flex:1; width:100%; max-width:1080px; margin:0 auto; padding:36px 32px 60px; }
+.view{ display:none; animation:fade .25s ease; }
+.view.active{ display:block; }
+@keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+
+.topline{ display:flex; align-items:center; justify-content:space-between; margin-bottom:26px; }
+.topline .kicker{ font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--teal); font-weight:600; }
+.topline h1{ font-size:26px; margin-top:4px; }
+
+/* ---- Catalogue ---- */
+.cata-layout{ display:flex; gap:28px; }
+.filters{ width:210px; flex-shrink:0; }
+.filter-block{ margin-bottom:22px; }
+.filter-block h3{ font-size:12.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-bottom:10px; }
+.filter-block label{ display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:8px; color:var(--ink); }
+
+.searchbar{
+  display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line);
+  border-radius:9px; padding:10px 14px; margin-bottom:18px;
+}
+.searchbar input{ border:none; outline:none; font-family:'Sora'; font-size:13.5px; width:100%; background:none; }
+
+.sortbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.sortbar select{ border:1px solid var(--line); border-radius:7px; padding:7px 10px; font-family:'Sora'; font-size:12.5px; background:#fff; }
+
+.catalogue-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; flex:1; }
+
+.active-filters{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+.filter-tag{
+  display:inline-flex; align-items:center; gap:7px; background:#EFF5F2; color:var(--teal-dark);
+  border:1px solid #D3E4DD; border-radius:20px; padding:5px 6px 5px 12px; font-size:12px; font-weight:600;
+}
+.filter-tag button{
+  border:none; background:rgba(47,111,94,.15); color:var(--teal-dark); width:16px; height:16px; border-radius:50%;
+  cursor:pointer; font-size:10px; line-height:1; display:flex; align-items:center; justify-content:center;
+}
+.filter-tag.clear{ background:none; border:none; color:var(--ink-soft); text-decoration:underline; padding:5px 4px; cursor:pointer; }
+
+.pagination{ display:flex; justify-content:center; align-items:center; gap:6px; margin-top:28px; }
+.pagination button{
+  width:32px; height:32px; border-radius:8px; border:1px solid var(--line); background:#fff;
+  font-family:'IBM Plex Mono'; font-size:12.5px; cursor:pointer; color:var(--ink-soft);
+}
+.pagination button.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+.pagination button.nav{ font-family:'Sora'; font-size:12px; width:auto; padding:0 12px; }
+
+/* ---- Cartes produit (grille catalogue) ---- */
+.card{
+  background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.card:hover{ transform:translateY(-3px); box-shadow:0 10px 24px rgba(29,27,46,.08); border-color:#D8D5CB; }
+.thumb{ height:110px; background:linear-gradient(135deg,#EDEBE3,#DCD8CB); position:relative; overflow:hidden; }
+.thumb .play{
+  position:absolute; top:8px; right:8px; background:rgba(29,27,46,.75); color:#fff;
+  width:22px; height:22px; border-radius:50%; font-size:9px; display:flex; align-items:center; justify-content:center;
+  transition:transform .18s ease;
+}
+.card:hover .thumb .play{ transform:scale(1.12); }
+.card-body{ padding:12px 13px; }
+.card-body .name{ font-size:13px; font-weight:600; margin-bottom:4px; }
+.card-body .shop{ font-size:11px; color:var(--ink-soft); margin-bottom:8px; }
+.price{ font-family:'IBM Plex Mono'; font-size:14px; font-weight:500; color:var(--teal-dark); }
+
+/* ---- Responsive (règles concernant catalogue/filtres) ---- */
+@media (max-width:900px){
+  .grid, .catalogue-grid{ grid-template-columns:repeat(2,1fr); }
+  .cata-layout{ flex-direction:column; }
+  .filters{ width:100%; }
+}
+
+
+
+
+
+
+
+
+
+
+
+.solde-badge{
+  position:absolute; top:8px; left:8px; z-index:2;
+  background:var(--danger); color:#fff;
+  font-family:'IBM Plex Mono'; font-size:11px; font-weight:600;
+  padding:3px 8px; border-radius:20px;
+}
+
+.solde-prices{ display:flex; align-items:baseline; gap:8px; }
+.price-old{
+  font-family:'IBM Plex Mono'; font-size:12px; color:var(--ink-soft);
+  text-decoration:line-through;
+}
