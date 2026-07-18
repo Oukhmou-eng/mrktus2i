@@ -14,6 +14,9 @@ import SignaleCard from './components/signaleCard'
 import Catalogue from    './pages/public/Catalogue'
 import Soldes from    './pages/public/Soldes'
 import Produit from './pages/public/Produit'
+import Comptelayout from './layouts/Comptelayout'
+
+import Favoris from './pages/Compte/Favoris'
 
 function App() {
 
@@ -32,7 +35,7 @@ function App() {
         <Route path="/catalogue"    element={<><Navbar/><Catalogue /></> } />
         <Route path="/soldes"    element={<><Navbar/><Soldes/></> } />
         <Route path="/produit/:id"    element={<><Navbar/><Produit /></> } />
-
+        <Route path="/favoris"    element={<> <Comptelayout/><Favoris/></> } />
       </Routes>
    
   )
