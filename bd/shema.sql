@@ -65,6 +65,22 @@ CREATE TABLE BOUTIQUES (
 ) ENGINE=InnoDB;
 
 -- ============================================================
+-- 3bis. INFOBOUTIQUE  (1 BOUTIQUE -> 1 informations de contact)
+-- ============================================================
+CREATE TABLE INFOBOUTIQUE (
+    id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_boutique     INT UNSIGNED NOT NULL UNIQUE,
+    adresse         VARCHAR(255) NULL,
+    tele            VARCHAR(30) NULL,
+    emailprof       VARCHAR(255) NULL,
+    instagram       VARCHAR(255) NULL,
+    facebook        VARCHAR(255) NULL,
+    CONSTRAINT fk_infoboutique_boutique
+        FOREIGN KEY (id_boutique) REFERENCES BOUTIQUES(id_boutique)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================
 -- 4. CATEGORIES  (auto-association : categorie parente)
 -- ============================================================
 CREATE TABLE CATEGORIES (

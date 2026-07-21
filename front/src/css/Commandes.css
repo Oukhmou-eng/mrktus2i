@@ -1,0 +1,138 @@
+.commandes-page {
+  width: 100%;
+}
+
+.commandes-page .order-tabs {
+  display: flex;
+  gap: 22px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line, #e5e4e7);
+  margin-bottom: 20px;
+}
+
+.commandes-page .order-tab {
+  appearance: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--ink-soft, #6b6375);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 0 10px;
+  white-space: nowrap;
+}
+
+.commandes-page .order-tab.active {
+  border-color: var(--amber, #e8a33d);
+  color: var(--ink, #1d1b2e);
+}
+
+.commandes-page .orders-list {
+  margin: 0;
+  padding: 6px 22px;
+}
+
+.commandes-page .order-card {
+  align-items: center;
+  border-bottom: 1px solid var(--line, #e5e4e7);
+  display: flex;
+  gap: 16px;
+  padding: 18px 0;
+}
+
+.commandes-page .order-card:last-child {
+  border-bottom: 0;
+}
+
+.commandes-page .list-thumb {
+  align-items: center;
+  background: linear-gradient(135deg, #edebe3, #dcd8cb);
+  border-radius: 9px;
+  display: flex;
+  flex: 0 0 54px;
+  height: 54px;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.commandes-page .list-thumb img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.commandes-page .meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.commandes-page .title {
+  color: var(--ink, #1d1b2e);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.commandes-page .sub {
+  color: var(--ink-soft, #6b6375);
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.commandes-page .price {
+  color: var(--teal-dark, #235b4a);
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 14px;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+.commandes-page .rightv {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.commandes-page .status-chip {
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+
+.commandes-page .status-chip.ok { background: #eff5f2; color: #235b4a; }
+.commandes-page .status-chip.pending { background: #fbf3e3; color: #9a6b1e; }
+.commandes-page .status-chip.cancel { background: #fbeeea; color: #b33a2c; }
+
+.commandes-page .link-sub {
+  color: var(--teal, #2f6f5e);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.commandes-page .orders-notice {
+  background: var(--panel, #fff);
+  border: 1px solid var(--line, #e5e4e7);
+  border-radius: 14px;
+  color: var(--ink-soft, #6b6375);
+  padding: 28px;
+  text-align: center;
+}
+
+.commandes-page .orders-notice--error {
+  background: #fbeeea;
+  border-color: #f1c5bd;
+  color: #9b3024;
+}
+
+@media (max-width: 720px) {
+  .commandes-page .orders-list { padding: 4px 16px; }
+  .commandes-page .order-card { align-items: flex-start; flex-wrap: wrap; }
+  .commandes-page .price { margin-left: 70px; }
+  .commandes-page .rightv { margin-left: auto; }
+  .commandes-page .sub { line-height: 1.45; }
+}

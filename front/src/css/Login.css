@@ -99,3 +99,22 @@ align: left;
   .login-top{ padding:18px 20px; }
   .auth-card{ width:100%; padding:26px 22px; }
 }
+
+.auth-error {
+    margin: 15px 0;
+    padding: 12px;
+    border-radius: 8px;
+    background: #ffe5e5;
+    color: #b00020;
+    border: 1px solid #f5b5b5;
+    font-size: 14px;
+}
+.auth-msg {
+    margin: 15px 0;
+    padding: 12px;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0a2c0177;
+    border: 1px solid #fafafa;
+    font-size: 14px;
+}

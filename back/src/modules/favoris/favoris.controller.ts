@@ -1,33 +1,33 @@
-﻿import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import { Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { FavorisService } from './favoris.service';
-import { CreateFavoriDto } from './dto/create-favori.dto';
 
 @Controller('favoris')
 export class FavorisController {
   constructor(private readonly favorisService: FavorisService) {}
 
-  @Post()
-  create(@Body() dto: CreateFavoriDto) {
-    return this.favorisService.create(dto);
+  @UseGuards(JwtAuthGuard)
+  @Post(':produitId')
+  addFavori(
+    @CurrentUser() user: { id_user: number },
+    @Param('produitId', ParseIntPipe) produitId: number,
+  ) {
+    return this.favorisService.addFavori(user.id_user, produitId);
   }
 
-  @Get()
-  findAll() {
-    return this.favorisService.findAll();
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  getMesFavoris(@CurrentUser() user: { id_user: number }) {
+    return this.favorisService.getFav(user.id_user);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.favorisService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<CreateFavoriDto>) {
-    return this.favorisService.update(+id, dto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.favorisService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  @Delete(':produitId')
+  removeFavori(
+    @CurrentUser() user: { id_user: number },
+    @Param('produitId', ParseIntPipe) produitId: number,
+  ) {
+    return this.favorisService.removeFavori(user.id_user, produitId);
   }
 }

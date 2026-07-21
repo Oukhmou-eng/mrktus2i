@@ -1,3 +1,4 @@
 ﻿export class CreateFavoriDto {
-  // TODO: definir les champs (voir table SQL correspondante)
+  id_user: number;
+  id_produit: number;
 }

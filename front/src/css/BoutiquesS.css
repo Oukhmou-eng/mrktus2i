@@ -1,0 +1,36 @@
+.followed-shops-page { flex: 1; min-width: 0; padding: 36px 32px 60px 304px; }
+.followed-shops { max-width: 920px; margin: 0 auto; }
+.followed-shops__header { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.followed-shops__eyebrow { color: var(--teal); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.followed-shops h1 { margin: 5px 0 8px; font-size: clamp(26px, 3vw, 34px); }
+.followed-shops__header p { margin: 0; color: var(--ink-soft); font-size: 13px; }
+.followed-shops__catalog-link { border: 0; background: transparent; color: var(--teal-dark); font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.followed-shops__catalog-link:hover { color: var(--teal); }
+.followed-shops__tools { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+.followed-shops__search { flex: 1; display: flex; align-items: center; gap: 9px; min-width: 0; color: var(--ink-soft); }
+.followed-shops__search input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 13px; }
+.followed-shops__sort { display: flex; align-items: center; gap: 8px; color: var(--ink-soft); font-size: 12px; white-space: nowrap; }
+.followed-shops__sort select { border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; background: #fff; color: var(--ink); font: inherit; font-size: 12px; }
+.followed-shops__count { margin: 16px 2px; color: var(--ink-soft); font-size: 12.5px; }
+.followed-shops__list { display: grid; gap: 12px; }
+.followed-shop-card { display: flex; align-items: center; gap: 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 15px; background: var(--panel); transition: transform .18s ease, box-shadow .18s ease; }
+.followed-shop-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(29, 27, 46, .08); }
+.followed-shop-card__logo { display: grid; place-items: center; width: 58px; height: 58px; overflow: hidden; flex: 0 0 auto; border-radius: 14px; background: linear-gradient(135deg, #e5eee9, #d4e3dc); color: var(--teal-dark); font-family: Fraunces, serif; font-size: 22px; font-weight: 700; }
+.followed-shop-card__logo img { width: 100%; height: 100%; object-fit: cover; }
+.followed-shop-card__content { flex: 1; min-width: 0; }
+.followed-shop-card h2 { margin: 0 0 6px; overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.followed-shop-card__details { display: flex; flex-wrap: wrap; gap: 6px 12px; color: var(--ink-soft); font-size: 12px; }
+.followed-shop-card__rating { color: var(--amber); font-weight: 700; }
+.followed-shop-card__verified { color: var(--teal-dark); }
+.followed-shop-card__actions { display: flex; align-items: center; gap: 9px; }
+.followed-shop-card__unfollow { border: 0; background: transparent; color: var(--ink-soft); font: inherit; font-size: 12px; cursor: pointer; }
+.followed-shop-card__unfollow:hover { color: var(--danger); }
+.followed-shop-card__unfollow:disabled { cursor: wait; opacity: .65; }
+.followed-shops__notice, .followed-shops__empty { margin-top: 18px; padding: 24px; border: 1px dashed var(--line); border-radius: 14px; color: var(--ink-soft); text-align: center; }
+.followed-shops__notice--error { border-color: #e8bbb4; background: #fff6f4; color: var(--danger); }
+.followed-shops__empty { padding: 48px 24px; }
+.followed-shops__empty > span { color: var(--teal); font-size: 32px; }
+.followed-shops__empty h2 { margin: 12px 0 8px; color: var(--ink); font-size: 18px; }
+.followed-shops__empty p { margin: 0 0 20px; font-size: 13px; }
+@media (max-width: 960px) { .followed-shops-page { padding: 24px 20px 48px; } }
+@media (max-width: 620px) { .followed-shops__header, .followed-shops__tools, .followed-shop-card { align-items: stretch; flex-direction: column; } .followed-shops__sort { justify-content: space-between; } .followed-shop-card__actions { justify-content: space-between; } }

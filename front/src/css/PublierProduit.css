@@ -1,0 +1,383 @@
+/* =======================================================================
+   1. POLICES & RESET
+   ======================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Sora:wght@400;500;600;700&display=swap');
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Sora', sans-serif;
+  font-size:15px;
+  -webkit-font-smoothing:antialiased;
+}
+
+h1, h2, h3{ font-family:'Fraunces', serif; font-weight:600; margin:0; }
+
+
+/* =======================================================================
+   2. STRUCTURE GÉNÉRALE (app shell)
+   ======================================================================= */
+
+.app{ display:flex; flex-direction:column; min-height:100vh; }
+
+.app-connected{ display:flex; flex:1; }
+
+
+/* ---- Barre du haut ---- */
+
+.rail{
+  background:#ffffff;
+  padding:12px 36px 8px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+
+.rail-top{ display:flex; align-items:center; justify-content:space-between; gap:20px; }
+
+.rail-brand{
+  font-family:'Fraunces', serif;
+  font-size:30px;
+  font-weight:600;
+  color:var(--teal-dark);
+  cursor:pointer;
+  background:none;
+  border:none;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-shrink:0;
+  text-decoration:none;
+}
+
+.rail-brand .dot{
+  width:9px;
+  height:9px;
+  border-radius:2px;
+  background:var(--amber);
+  transform:rotate(45deg);
+  display:inline-block;
+}
+
+.rail-right{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+
+.rail-icon-btn{
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:19px;
+  color:var(--ink);
+  padding:8px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.rail-icon-btn:hover{ background-color:#F1F0EA; }
+
+
+/* ---- Barre latérale ---- */
+
+.sidebar{
+  width:260px;
+  background:#fff;
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  padding:24px 16px;
+  position:sticky;
+  top:var(--rail-height, 104px);
+  height:calc(100vh - var(--rail-height, 104px));
+}
+
+.shop-card{
+  background:#F9FBFA;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.shop-card .logo{ width:40px; height:40px; border-radius:8px; background:var(--teal); }
+.shop-card .name{ font-size:14px; font-weight:700; }
+.shop-card .badge{ font-size:10px; color:var(--teal); font-weight:600; text-transform:uppercase; }
+
+.sidebar-nav{ display:flex; flex-direction:column; gap:4px; flex:1; }
+
+.snav-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  color:var(--ink-soft);
+  text-decoration:none;
+  font-size:13.5px;
+  font-weight:500;
+  transition:all .2s;
+}
+
+.snav-item:hover{ background:#F1F0EA; color:var(--ink); }
+.snav-item.active{ background:#EFF5F2; color:var(--teal-dark); font-weight:600; }
+.snav-item .ic{ font-size:16px; }
+
+
+/* =======================================================================
+   3. ZONE DE CONTENU (pages)
+   ======================================================================= */
+
+.content-area{ flex:1; padding:24px 32px 60px; }
+
+.topline{ display:flex; align-items:center; justify-content:space-between; margin-bottom:26px; }
+.topline .kicker{ font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--teal); font-weight:600; }
+.topline h1{ font-size:26px; margin-top:4px; }
+
+
+/* =======================================================================
+   4. FORMULAIRES (générique — carte, champs)
+   ======================================================================= */
+
+.form-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:30px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:32px;
+}
+
+.form-col{ display:flex; flex-direction:column; }
+
+.field{ margin-bottom:20px; }
+.field:last-child{ margin-bottom:0; }
+
+.field label{
+  display:block;
+  font-size:13px;
+  font-weight:600;
+  margin-bottom:8px;
+  color:var(--ink);
+}
+
+.field-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+.field-hint{
+  font-size:11px;
+  color:var(--ink-soft);
+  margin-top:6px;
+}
+
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  font-family:'Sora', sans-serif;
+  font-size:14px;
+  outline:none;
+  background:#F9FBFA;
+  color:var(--ink);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+  border-color:var(--teal);
+  background:#fff;
+}
+
+.field textarea{ height:120px; resize:none; }
+
+.form-message{ font-size:13px; margin:10px 0 0; }
+.form-message--error{ color:#C0392B; }
+.form-message--success{ color:var(--teal-dark); }
+
+.form-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  margin-top:30px;
+  border-top:1px solid var(--line);
+  padding-top:24px;
+}
+
+
+/* =======================================================================
+   5. ZONE D'AJOUT DE MÉDIAS (photos + vidéo, ordre unifié)
+   ======================================================================= */
+
+.dropzone{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:4px;
+  border:2px dashed var(--line);
+  border-radius:12px;
+  padding:32px 16px;
+  cursor:pointer;
+  color:var(--ink-soft);
+  background:#F9FBFA;
+  transition:border-color .15s ease, background .15s ease, color .15s ease;
+}
+
+.dropzone:hover{
+  border-color:var(--teal);
+  background:#F1F8F5;
+  color:var(--teal-dark);
+}
+
+.dropzone--compact{ padding:18px 16px; }
+
+.dropzone-input{
+  /* input natif invisible mais accessible (pas de display:none pur, garde le focus clavier) */
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  overflow:hidden;
+}
+
+.dropzone-icon{ font-size:28px; }
+.dropzone-title{ font-size:14px; font-weight:600; color:var(--ink); }
+.dropzone-hint{ font-size:11px; }
+
+
+/* ---- Galerie d'aperçus (images + vidéo) ---- */
+
+.media-grid{
+  list-style:none;
+  margin:14px 0 0;
+  padding:0;
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));
+  gap:10px;
+}
+
+.media-thumb{
+  position:relative;
+  border:1px solid var(--line);
+  border-radius:10px;
+  overflow:hidden;
+  aspect-ratio:1 / 1;
+  background:#F9FBFA;
+}
+
+.media-thumb.is-cover{ border:2px solid var(--teal); }
+
+.media-thumb img,
+.media-thumb video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.media-thumb-tag{
+  position:absolute;
+  bottom:6px;
+  left:6px;
+  background:rgba(0,0,0,.65);
+  color:#fff;
+  font-size:10px;
+  font-weight:600;
+  padding:3px 7px;
+  border-radius:6px;
+}
+
+.media-thumb-badge{
+  position:absolute;
+  top:6px;
+  left:6px;
+  background:var(--teal);
+  color:#fff;
+  font-size:10px;
+  font-weight:600;
+  padding:3px 7px;
+  border-radius:6px;
+}
+
+/* Boutons toujours visibles (pas de :hover) pour rester utilisables au tactile */
+.media-thumb-btn{
+  position:absolute;
+  top:6px;
+  width:24px;
+  height:24px;
+  border:none;
+  border-radius:50%;
+  font-size:12px;
+  line-height:1;
+  cursor:pointer;
+  background:rgba(255,255,255,.92);
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.media-thumb-btn:hover{ background:#fff; }
+
+.media-thumb-btn--cover{ left:6px; color:var(--amber); }
+.media-thumb-btn--remove{ right:6px; }
+
+
+/* =======================================================================
+   6. BOUTONS
+   ======================================================================= */
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:var(--ink);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:12px 24px;
+  font-family:'Sora', sans-serif;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .15s ease;
+  text-decoration:none;
+}
+
+.btn.teal{ background:var(--teal); }
+.btn.teal:hover{ background:var(--teal-dark); }
+.btn.outline{ background:none; border:1px solid var(--line); color:var(--ink); }
+
+
+/* =======================================================================
+   7. RESPONSIVE
+   ======================================================================= */
+
+@media (max-width: 860px){
+  .form-grid,
+  .field-row{ grid-template-columns:1fr; }
+
+  .sidebar{ display:none; } /* à remplacer par un menu mobile si besoin */
+}

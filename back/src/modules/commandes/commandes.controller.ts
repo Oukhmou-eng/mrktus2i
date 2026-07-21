@@ -1,4 +1,4 @@
-﻿import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { CommandesService } from './commandes.service';
 import { CreateCommandeDto } from './dto/create-commande.dto';
 
@@ -16,6 +16,11 @@ export class CommandesController {
     return this.commandesService.findAll();
   }
 
+
+  @Get('utilisateur/:userId')
+  findByUser(@Param('userId') userId: string) {
+    return this.commandesService.findByUser(+userId);
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.commandesService.findOne(+id);

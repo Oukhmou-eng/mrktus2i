@@ -4,8 +4,8 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 
 function Boutique(){
   const navigate = useNavigate();
-  const location = useLocation();
   const { id } = useParams();
+  
 
   const [modalOpen, setModalOpen] = useState(false);
   const [ModalAvis, setModalAvis] = useState(false);
@@ -63,13 +63,20 @@ const handleGetA = async () => {
 
 
 const handleAjouterAvis = async () => { 
+    const token = localStorage.getItem("token");
+
+if (!token) {
+  navigate("/login");
+  return;
+}
      try {
-        const res = await fetch(`http://localhost:3000/boutiques/${id}/avis`, {
+        const res = await fetch(`http://localhost:3000/boutiques/avis`, {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id, note, commentaire }),
+          body: JSON.stringify({ id,note, commentaire }),
         });
 
         const data = await res.json();

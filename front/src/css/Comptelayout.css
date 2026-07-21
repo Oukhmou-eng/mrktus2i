@@ -4,7 +4,7 @@
 
 /* ---- Sidebar ---- */
 .sidebar{
-  width:272px; flex-shrink:0; position:sticky; top:0;
+  width:272px; flex-shrink:0; position:fixed; top:92px; left:0;
   align-self:flex-start;
   background:var(--panel); border:1px solid var(--line); border-left:none;
   border-radius:0 16px 16px 0;

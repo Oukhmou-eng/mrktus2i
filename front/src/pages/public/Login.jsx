@@ -1,11 +1,22 @@
 import "../../css/Login.css";
 import { useState } from "react";
-
+import { useNavigate, useLocation } from 'react-router-dom'
 function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(""); 
+  const [msg, setMsg] = useState(""); 
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+
+  const handleLogin = async (e) => {
+    setError('');
+      setMsg('');
+      if (loading) return; // Empêche plusieurs clics
+
+      setLoading(true);
+       e.preventDefault();
     try {
       const res = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
@@ -13,21 +24,35 @@ function Login() {
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
+    
+
+
 
       if (!res.ok) {
-        console.error('Login failed:', data);
+       setError(data.message || "Une erreur est survenue.");
         return;
       }
 
       if (data.error) {
-        console.error('Login failed:', data.error);
+       setError("Impossible de contacter le serveur.");
         return;
       }
+      if (data.token) {
+                      localStorage.setItem("token", data.token);
+                      localStorage.setItem("nom", data.nom);
+                      localStorage.setItem("email", data.email);
+                      localStorage.setItem("role", data.role);
+navigate('/espConnecter'); 
+}
 
-      console.log('Login successful:', data);
+
+      setMsg(data.message) ; 
+      
     } catch (error) {
       console.error('An error occurred during login.', error);
-    }
+    }  finally {
+    setLoading(false);
+  }
   }
   const handleForgotPassword = () => {
     console.log({
@@ -43,24 +68,65 @@ function Login() {
   <main className="auth-wrap">
     <div className="auth-card">
       <h2 style={{ color: '#000' }}> Se connecter</h2>
+      {error && (
+                 <div className="auth-error">
+                 {error}
+                 </div>
+                )}
+      <div className="auth-msg">
+       {msg}
+     </div>
 
    
-      <div className="auth-pane active" id="pane-login">
-        <div className="field">
-          <label  htmlFor="login-email">Adresse e-mail</label>
-          <input type="email" id="login-email" placeholder="vous@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)}/>
-        </div>
-        <div className="field">
-          <label  htmlFor="login-password">Mot de passe</label>
-          <input type="password" id="login-password" placeholder="••••••••"   value={password} onChange={(e) => setPassword(e.target.value)}/>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-          <a className="auth-forgot" data-goto-pane="forgot" href="#">Mot de passe oublié ?</a>
-        </div>
-        <button className="btn teal" id="loginSubmitBtn" onClick={handleLogin}>Se connecter</button>
-        <div className="auth-sep">— ou —</div>
-        <button className="btn outline" style={{ width: '100%' }}>Continuer avec Google</button>
-      </div>
+      <form onSubmit={handleLogin}>
+  <div className="auth-pane active" id="pane-login">
+    <div className="field">
+      <label htmlFor="login-email">Adresse e-mail</label>
+      <input
+        type="email"
+        id="login-email"
+        placeholder="vous@exemple.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+    </div>
+
+    <div className="field">
+      <label htmlFor="login-password">Mot de passe</label>
+      <input
+        type="password"
+        id="login-password"
+        placeholder="••••••••"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+    </div>
+
+    <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px" }}>
+      <a className="auth-forgot" data-goto-pane="forgot" href="#">
+        Mot de passe oublié ?
+      </a>
+    </div>
+
+    <button
+      type="submit"
+      className="btn teal"
+      id="loginSubmitBtn"
+    >
+     {loading ? "connexion en cours..." : "se connecter"}
+    </button>
+
+    <div className="auth-sep">— ou —</div>
+
+    <button
+      type="button"
+      className="btn outline"
+      style={{ width: "100%" }}
+    >
+      Continuer avec Google
+    </button>
+  </div>
+</form>
 
      
       <div className="auth-pane" id="pane-forgot">

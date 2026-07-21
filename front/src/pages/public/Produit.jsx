@@ -154,6 +154,12 @@ const fetchReviews = async () => {
   };
 
   const handleSubmitReview = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
     if (!commentaire.trim()) {
       return;
     }
@@ -164,6 +170,7 @@ const fetchReviews = async () => {
       const res = await fetch("http://localhost:3000/avis", {
         method: "POST",
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

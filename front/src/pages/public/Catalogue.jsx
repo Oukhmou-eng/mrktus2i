@@ -1,4 +1,5 @@
 import "../../css/Catalogue.css";
+import "../../css/Favoris.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -59,6 +60,7 @@ function Catalogue() {
   /* ---------- État de chargement / erreur ---------- */
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [favoris, setFavoris] = useState(new Set());
 
   /* ---------- Catégories dynamiques (backend) ---------- */
   const [categories, setCategories] = useState([]);
@@ -214,6 +216,36 @@ function Catalogue() {
   const handlePageChange = (page) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
+  };
+
+  const toggleFavori = async (produitId) => {
+    const userId = 1;
+    const estFavori = favoris.has(produitId);
+
+    setFavoris((prev) => {
+      const next = new Set(prev);
+      if (estFavori) next.delete(produitId);
+      else next.add(produitId);
+      return next;
+    });
+
+    try {
+      const res = await fetch(`http://localhost:3000/favoris/${userId}/${produitId}`, {
+        method: estFavori ? "DELETE" : "POST",
+      });
+
+      if (!res.ok) {
+        throw new Error(`Erreur HTTP ${res.status}`);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des favoris :", error);
+      setFavoris((prev) => {
+        const next = new Set(prev);
+        if (estFavori) next.add(produitId);
+        else next.delete(produitId);
+        return next;
+      });
+    }
   };
 
   const goToPrevious = () => handlePageChange(currentPage - 1);
@@ -383,7 +415,9 @@ function Catalogue() {
             {/* Grille produits */}
             {!isLoading && !loadError && produits.length > 0 && (
               <div className="catalogue-grid">
-                {produits.map((product) => (
+                {produits.map((product) => {
+                  const estFavori = favoris.has(product.id);
+                  return (
                   <div
                     className="card"
                     key={product.id}
@@ -404,6 +438,15 @@ function Catalogue() {
                       <span className="play">▶</span>
                     </div>
                     <div className="card-body">
+                      <button
+                        type="button"
+                        className={`fav-btn ${estFavori ? "fav-active" : ""}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavori(product.id);
+                        }}
+                        aria-label={estFavori ? "Retirer des favoris" : "Ajouter aux favoris"}
+                      />
                       <div className="name">{product.name}</div>
                       <div className="shop">{product.shop}</div>
                       <div className="price">
@@ -411,7 +454,8 @@ function Catalogue() {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 

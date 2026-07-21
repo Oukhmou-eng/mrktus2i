@@ -27,8 +27,7 @@ export class HomeService {
             LIMIT 1
           )
         WHERE p.statut = 'en_ligne'
-        ORDER BY p.date_creation DESC
-        LIMIT 6;
+        ORDER BY p.date_creation DESC ;
       `);
 
       return { produitsVedette: produitsVedette ?? [] };

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "setup": "integrated",
+  "languages": [
+    "JavaScript/TypeScript"
+  ],
+  "stacks": [
+    "Node.js"
+  ],
+  "markers": [
+    "package.json"
+  ],
+  "createdAt": "2026-07-21T10:43:24.302Z",
+  "tool": "xgrok"
+}
