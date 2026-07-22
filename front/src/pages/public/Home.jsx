@@ -1,5 +1,6 @@
 import "../../css/Home.css";
 import "../../css/Favoris.css";
+import "../../css/Dialogue.css";
 import { useState } from "react";
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -8,6 +9,7 @@ function Home() {
 const [info, setInfo] = useState([]);
 const [favoris, setFavoris] = useState(new Set());
 const navigate = useNavigate();
+const [showFavDialog, setShowFavDialog] = useState(false);
 
  const normalizeProducts = (items) => {
   const products = Array.isArray(items)
@@ -25,10 +27,14 @@ const navigate = useNavigate();
 };
 
 const handleGetHomeData = async () => {
+    const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:3000/home');
+      const res = await fetch('http://localhost:3000/home', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       const data = await res.json();
       setInfo(data?.produitsVedette ?? []);
+      setFavoris(new Set(data?.favoris ?? []));
       console.log(data);
     } catch (error) {
       console.error('An error ', error);
@@ -37,13 +43,15 @@ const handleGetHomeData = async () => {
 
 useEffect(() => { handleGetHomeData();  }, []);
 
+
+
 const toggleFavori = async (produitId) => {
 
 
   const token = localStorage.getItem("token");
 
 if (!token) {
-  navigate("/login");
+  setShowFavDialog(true); 
   return;
 }
   
@@ -141,6 +149,7 @@ return (
           }}
           aria-label={estFavori ? "Retirer des favoris" : "Ajouter aux favoris"}
         />
+        
         <div className="name">{produit.nom}</div>
         <div className="shop">{produit.boutique}</div>
         <div className="price">{produit.prix} MAD</div>
@@ -149,6 +158,14 @@ return (
     );
   })}
 </div>
+ <FavDialog
+          isOpen={showFavDialog}
+          onConfirm={() => {
+            setShowFavDialog(false);
+            navigate('/login');
+          }}
+          onCancel={() => setShowFavDialog(false)}
+      />
       
     </section>
 
@@ -160,6 +177,31 @@ return (
 }
 
 export default Home ;
+
+
+
+
+
+const FavDialog = ({ isOpen, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="dialog-overlay" onClick={onCancel}>
+      <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
+        <h3>Connexion requise</h3>
+        <p>Vous devez être connecté pour ajouter ce produit au favoris . Voulez-vous vous connecter ?</p>
+        <div className="dialog-actions">
+          <button onClick={onCancel} className="btn-secondary">
+            Annuler
+          </button>
+          <button onClick={onConfirm} className="btn-primary">
+            Se connecter
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 

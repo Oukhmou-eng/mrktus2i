@@ -1,4 +1,4 @@
-import { BrowserRouter,Routes, Route } from 'react-router-dom';
+import { BrowserRouter,Routes, Route, Navigate } from 'react-router-dom';
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -15,6 +15,7 @@ import Catalogue from    './pages/public/Catalogue'
 import Soldes from    './pages/public/Soldes'
 import Produit from './pages/public/Produit'
 import Comptelayout from './layouts/Comptelayout'
+import VendeurSidebar from './layouts/VendeurLayout'
 
 import Messages from './pages/compte/Messages'
 import Favoris from './pages/compte/Favoris'
@@ -25,9 +26,11 @@ import CreerBoutique from './pages/compte/CreerBoutique'
 import PublierProduit from './pages/vendeur/PublierProduit'
 import Commandes from './pages/compte/Commandes'
 
+const token = localStorage.getItem('token')
 
 function App() {
 
+   
   return (
 
 
@@ -37,22 +40,52 @@ function App() {
         <Route path="/login"    element={<><Navbar/><Login /></> } />
         <Route path="/registre" element={<><Navbar/><Registre /></> } />
         <Route path="/home"    element={<><Navbar/><Home /></> } />
-         <Route path="/espConnecter"    element={<><Navbar/><Comptelayout/><Home /></> } />
+         
+         <Route path="/vendeur"    element={<><Navbar/><VendeurSidebar/></> } />
         <Route path="/boutiques"    element={<><Navbar/><Boutiques /></> } />
         <Route path="/boutique/:id"    element={<><Navbar/><Boutique /></> } />
+
+
         <Route path="/signaler"    element={<><Navbar/><SignaleCard /></> } />
+
+
         <Route path="/catalogue"    element={<><Navbar/><Catalogue /></> } />
         <Route path="/soldes"    element={<><Navbar/><Soldes/></> } />
         <Route path="/produit/:id"    element={<><Navbar/><Produit /></> } />
-        <Route path="/fav/:id"   element={<><Navbar/><Comptelayout/><Favoris/> </>} /> 
-        <Route path="/bs/:id"   element={<><Navbar/><Comptelayout/><BoutiquesS/> </>} /> 
-        <Route path="/boutiques-suivies/:id" element={<><Navbar/><Comptelayout/><BoutiquesS/></>} />
-        <Route path="/notifications/:id" element={<><Navbar/><Comptelayout/><Notifications/></>} />
+        
+
+       
         <Route path="/mes-produits/:id" element={<><Navbar/><MesProduits/></>} />
-        <Route path="/mes-commandes" element={<><Navbar/><Comptelayout/><Commandes /></>} />
-        <Route path="/creer-boutique" element={<><Navbar/><Comptelayout/><CreerBoutique /></>} />
+        
+       
       
-        <Route path="/publier" element={<><Navbar/><Comptelayout/><PublierProduit/></>} />
+        <Route path="/publierProduit" element={<><Navbar/><VendeurSidebar/><PublierProduit/></>} />
+
+
+
+       <Route path="/espConnecter" element={
+          token ? <><Navbar/><Comptelayout/><Home /></> : <Navigate to="/login" />
+        } />
+        <Route path="/favoris" element={
+          token ? <><Navbar/><Comptelayout/><Favoris/> </> : <Navigate to="/login" />
+        } />
+        <Route path="/mes-commandes" element={
+          token ? <><Navbar/><Comptelayout/><Commandes /> </> : <Navigate to="/login" />
+        } />
+       <Route path="/notifications" element={
+          token ? <><Navbar/><Comptelayout/><Notifications/> </> : <Navigate to="/login" />
+        } />
+        <Route path="/boutiques-suivies" element={
+          token ? <><Navbar/><Comptelayout/><BoutiquesS/> </> : <Navigate to="/login" />
+        } />
+        <Route path="/creer-boutique" element={
+          token ? <><Navbar/><Comptelayout/><CreerBoutique /> </> : <Navigate to="/login" />
+        } />
+
+
+
+
+
       </Routes>
    
   )

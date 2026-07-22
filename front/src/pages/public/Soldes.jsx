@@ -1,5 +1,6 @@
 import "../../css/Catalogue.css";
 import "../../css/Favoris.css";
+import "../../css/Favoris.css";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -21,6 +22,7 @@ function Soldes() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [favoris, setFavoris] = useState(new Set());
+  const [showFavDialog, setShowFavDialog] = useState(false);
 
   /* =========================================================
      Appel API
@@ -79,8 +81,25 @@ function Soldes() {
     }
   };
 
+  const loadFavoris = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const res = await fetch('http://localhost:3000/favoris/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
+      const data = await res.json();
+      setFavoris(new Set((data?.produitsVedette ?? []).map((produit) => produit.id_produit)));
+    } catch (error) {
+      console.error('Erreur lors du chargement des favoris :', error);
+    }
+  };
+
   useEffect(() => {
     fetchSoldes();
+    loadFavoris();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
@@ -99,34 +118,45 @@ function Soldes() {
   };
 
   const toggleFavori = async (produitId) => {
-    const userId = 1;
-    const estFavori = favoris.has(produitId);
 
-    setFavoris((prev) => {
-      const next = new Set(prev);
-      if (estFavori) next.delete(produitId);
-      else next.add(produitId);
-      return next;
+
+  const token = localStorage.getItem("token");
+
+if (!token) {
+  setShowFavDialog(true); 
+  return;
+}
+  
+  const estFavori = favoris.has(produitId);
+
+  setFavoris((prev) => {
+    const next = new Set(prev);
+    if (estFavori) next.delete(produitId);
+    else next.add(produitId);
+    return next;
+  });
+
+  try {
+    const res = await fetch(`http://localhost:3000/favoris/${produitId}`, {
+      method: estFavori ? "DELETE" : "POST",
+      headers: {
+    Authorization: `Bearer ${token}`,
+  },
     });
 
-    try {
-      const res = await fetch(`http://localhost:3000/favoris/${userId}/${produitId}`, {
-        method: estFavori ? "DELETE" : "POST",
-      });
-
-      if (!res.ok) {
-        throw new Error(`Erreur HTTP ${res.status}`);
-      }
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour des favoris :", error);
-      setFavoris((prev) => {
-        const next = new Set(prev);
-        if (estFavori) next.add(produitId);
-        else next.delete(produitId);
-        return next;
-      });
+    if (!res.ok) {
+      throw new Error(`Erreur HTTP ${res.status}`);
     }
-  };
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour des favoris :", error);
+    setFavoris((prev) => {
+      const next = new Set(prev);
+      if (estFavori) next.add(produitId);
+      else next.delete(produitId);
+      return next;
+    });
+  }
+};
 
   const goToPrevious = () => handlePageChange(currentPage - 1);
   const goToNext = () => handlePageChange(currentPage + 1);
@@ -259,6 +289,14 @@ function Soldes() {
             })}
           </div>
         )}
+         <FavDialog
+          isOpen={showFavDialog}
+          onConfirm={() => {
+            setShowFavDialog(false);
+            navigate('/login');
+          }}
+          onCancel={() => setShowFavDialog(false)}
+      />
 
         {/* Pagination */}
         <div className="pagination">
@@ -284,3 +322,28 @@ function Soldes() {
 }
 
 export default Soldes;
+
+
+
+
+const FavDialog = ({ isOpen, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="dialog-overlay" onClick={onCancel}>
+      <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
+        <h3>Connexion requise</h3>
+        <p>Vous devez être connecté pour ajouter ce produit au favoris . Voulez-vous vous connecter ?</p>
+        <div className="dialog-actions">
+          <button onClick={onCancel} className="btn-secondary">
+            Annuler
+          </button>
+          <button onClick={onConfirm} className="btn-primary">
+            Se connecter
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+

@@ -3,8 +3,19 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 
 function Boutique(){
+
+
+
+
   const navigate = useNavigate();
   const { id } = useParams();
+    const [showAuthDialog, setShowAuthDialog] = useState(false);
+    const [showAvisDialog, setShowAvisDialog] = useState(false);
+ 
+
+
+
+
   
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -19,6 +30,81 @@ const [commentaire, setCommentaire] = useState("");
   const [avis, setAvis] = useState([]);
   const [motif, setMotif] = useState("");
   const [description, setDescription] = useState(""); 
+
+  const [isFollowed, setIsFollowed] = useState(false); // état initial selon vos données
+const [errorr, setErrorr] = useState(null);
+
+const idb = id;
+
+
+
+useEffect(() => {
+  const fetchFollowStatus = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return; // utilisateur non connecté, isFollowed reste false
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/boutiques/${idb}/suiviestest`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setIsFollowed(data.isFollowed);
+      }
+    } catch (err) {
+      console.error("Erreur lors de la récupération du statut de suivi :", err);
+    }
+  };
+
+  fetchFollowStatus();
+}, [idb]);
+
+
+
+
+const toggleFollow = async (boutiqueId) => {
+  const token = localStorage.getItem("token");
+   if (!token) {
+    setShowAuthDialog(true); // au lieu de navigate direct
+    return;
+  }
+
+
+  const wasFollowed = isFollowed;
+
+  // Mise à jour optimiste
+  setIsFollowed(!wasFollowed);
+  setErrorr(null);
+
+  try {
+    const response = await fetch(
+      `http://localhost:3000/boutiques/${boutiqueId}/suivies`,
+      {
+        method: wasFollowed ? "DELETE" : "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data?.message || "Erreur de suivi");
+  } catch (requestError) {
+    console.error("Erreur lors de la mise à jour du suivi :", requestError);
+    // Rollback
+    setIsFollowed(wasFollowed);
+    setErrorr("La mise à jour du suivi n'a pas pu être enregistrée.");
+  }
+};
+
+
+
+
+  
+
 
   useEffect(() => {
     const chargerBoutique = async () => {
@@ -66,7 +152,7 @@ const handleAjouterAvis = async () => {
     const token = localStorage.getItem("token");
 
 if (!token) {
-  navigate("/login");
+  setShowAvisDialog(true)
   return;
 }
      try {
@@ -193,22 +279,46 @@ if (!token) {
         ★★★★★ {boutique?.note_moyenne}{boutique?.estVerifier ? ' · Vendeur vérifié' : ''}
       </div>
     </div>
-    <div className="shop-head-actions">
-      <button className="btn-follow" >+ Suivre</button>
-    </div>
+
+
+<button
+                  className={`directory-shop-card__follow ${isFollowed ? "is-followed" : ""}`}
+                  onClick={() => toggleFollow(Number(id))}
+                  aria-pressed={isFollowed}
+                >
+                  {isFollowed ? "✓ Suivie" : "+ Suivre"}
+                </button>
+      <AuthDialog
+          isOpen={showAuthDialog}
+          onConfirm={() => {
+            setShowAuthDialog(false);
+            navigate('/login');
+          }}
+          onCancel={() => setShowAuthDialog(false)}
+      />
+
+    
   </div>
 
   <div className="shop-stats">
     <div>{produits.length}<span>Produits</span></div>
     <div>2.4k<span>Ventes</span></div>
     <div>98%<span>Satisfaction</span></div>
-    <div>{new Date(boutique?.date_creation).getFullYear()}
+    <div>{boutique?.date_creation ? new Date(boutique.date_creation).getFullYear() : '—'}
 <span>Sur Le Panier</span></div>
   </div>
 
   <div className="tabs">
     <button className="btn-report" onClick={() => afficherP()} >Produits</button>
     <button className="btn-report" onClick={() => ouvrirModalAvis()} >Avis ({avis.length})</button>
+    <AvisDialog
+          isOpen={showAvisDialog}
+          onConfirm={() => {
+            setShowAuthDialog(false);
+            navigate('/login');
+          }}
+          onCancel={() => setShowAvisDialog(false)}
+      />
     <button className="btn-report" onClick={() => ouvrirModal()} >⚑ Signaler</button>
   </div>
 
@@ -218,6 +328,7 @@ if (!token) {
   <div id="shop-pane-produits">
     <div className="grid" >
       {produitsVisibles.map((produit) => (
+        
         <div className="card" key={produit.id_produit}>
           <div
             className="thumb"
@@ -452,3 +563,50 @@ if (!token) {
 }
 
 export default Boutique;
+
+
+
+ const AuthDialog = ({ isOpen, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="dialog-overlay" onClick={onCancel}>
+      <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
+        <h3>Connexion requise</h3>
+        <p>Vous devez être connecté pour suivre cette boutique. Voulez-vous vous connecter ?</p>
+        <div className="dialog-actions">
+          <button onClick={onCancel} className="btn-secondary">
+            Annuler
+          </button>
+          <button onClick={onConfirm} className="btn-primary">
+            Se connecter
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+ const AvisDialog = ({ isOpen, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="dialog-overlay" onClick={onCancel}>
+      <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
+        <h3>Connexion requise</h3>
+        <p>Vous devez être connecté pour commenter cette boutique. Voulez-vous vous connecter ?</p>
+        <div className="dialog-actions">
+          <button onClick={onCancel} className="btn-secondary">
+            Annuler
+          </button>
+          <button onClick={onConfirm} className="btn-primary">
+            Se connecter
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

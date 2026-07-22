@@ -76,6 +76,16 @@ export class NotificationsService {
     return { success: true, updated: result.affectedRows ?? 0 };
   }
 
+  async markAsRead(userId: number, notificationId: number) {
+    const result: any = await this.db.query(
+      `UPDATE notifications
+       SET lu = 1
+       WHERE id_notification = ? AND id_user = ?`,
+      [notificationId, userId],
+    );
+    return { success: result.affectedRows > 0 };
+  }
+
   async remove(id: number) {
     const result: any = await this.db.query(
       `DELETE FROM notifications WHERE id_notification = ?`,

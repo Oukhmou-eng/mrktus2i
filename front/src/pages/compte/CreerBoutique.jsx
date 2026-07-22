@@ -25,6 +25,8 @@ function CreerBoutique() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const token = localStorage.getItem('token');
+   
 
   const updateField = ({ target: { name, value } }) => {
     setForm((current) => ({ ...current, [name]: value }));
@@ -65,6 +67,7 @@ function CreerBoutique() {
       const response = await fetch(`${API_URL}/boutiques`, {
         method: 'POST',
         body: payload,
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
 

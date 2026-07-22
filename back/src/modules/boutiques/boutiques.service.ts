@@ -9,9 +9,9 @@ import { slugify } from '../../common/utils/slugify.util';
 export class BoutiquesService {
   constructor(private readonly db: DatabaseService) {}
 
-  async create(dto: CreateBoutiqueDto) {
+  async create(id: number , dto: CreateBoutiqueDto) {
     const connection = await this.db.getPool().getConnection();
-    const idUser = 1;
+    const idUser = id;  
     const baseSlug = slugify(dto.nom).replace(/^-|-$/g, '') || 'boutique';
 
     try {
@@ -184,8 +184,44 @@ async findOne(id: number) {
   
 
 
+async checkFollow(id_user: number, boutiqueId: number) {
+  const follow =await this.db.query(
+`
+     SELECT  * FROM boutiques_suivies
+     WHERE id_user = ? AND id_boutique = ? 
+     
+     
+     ` , [id_user ,boutiqueId  ]
+   
+  ) as any[] ;
+
+   if (follow.length === 0) {
+           return {isFollowed: false }
+         
+      }
+  return { isFollowed: true  };
+}
 
 
+
+async getMesBoutiques(id_user: number) {
+  const boutiques = await this.db.query(`
+    SELECT * FROM 
+    boutiques 
+    WHERE id_user =  ?
+    
+    `, [id_user] );
+  return { boutiques };
+}
+async getMesBoutiquesid(id_user: number, id: number ) {
+  const boutiques = await this.db.query(`
+    SELECT * FROM 
+    boutiques 
+    WHERE id_user =  ? AND id_boutique = ?
+    
+    `, [id_user, id ] );
+  return { boutiques };
+}
 
 
 

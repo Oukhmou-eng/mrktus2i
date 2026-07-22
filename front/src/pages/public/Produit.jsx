@@ -22,7 +22,7 @@ function Produit() {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [similarBy, setSimilarBy] = useState("categorie");
   const [similarProducts, setSimilarProducts] = useState([]);
-
+  const [showAvisDialog, setShowAvisDialog] = useState(false);
 
 
 
@@ -156,7 +156,7 @@ const fetchReviews = async () => {
   const handleSubmitReview = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
-      navigate('/login');
+      setShowAvisDialog(true)
       return;
     }
 
@@ -179,7 +179,7 @@ const fetchReviews = async () => {
           note,
           commentaire: commentaire.trim(),
           
-          id_user: 1,
+      
         }),
         
       });
@@ -357,6 +357,14 @@ const fetchReviews = async () => {
                 >
                   {isSubmittingReview ? "Envoi..." : "Ajouter un avis"}
                 </button>
+                <AvisDialog
+          isOpen={showAvisDialog}
+          onConfirm={() => {
+            setShowAuthDialog(false);
+            navigate('/login');
+          }}
+          onCancel={() => setShowAvisDialog(false)}
+      />
               </div>
             </div>
 
@@ -454,3 +462,28 @@ const fetchReviews = async () => {
 }
 
 export default Produit;
+
+
+
+
+
+const AvisDialog = ({ isOpen, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="dialog-overlay" onClick={onCancel}>
+      <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
+        <h3>Connexion requise</h3>
+        <p>Vous devez être connecté pour commenter cette produit. Voulez-vous vous connecter ?</p>
+        <div className="dialog-actions">
+          <button onClick={onCancel} className="btn-secondary">
+            Annuler
+          </button>
+          <button onClick={onConfirm} className="btn-primary">
+            Se connecter
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -2,7 +2,34 @@ import "../../css/Boutiques.css";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
+
+
+
+
 function Boutiques() {
+
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const AuthDialog = ({ isOpen, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="dialog-overlay" onClick={onCancel}>
+      <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
+        <h3>Connexion requise</h3>
+        <p>Vous devez être connecté pour suivre cette boutique. Voulez-vous vous connecter ?</p>
+        <div className="dialog-actions">
+          <button onClick={onCancel} className="btn-secondary">
+            Annuler
+          </button>
+          <button onClick={onConfirm} className="btn-primary">
+            Se connecter
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
   const navigate = useNavigate();
   // Le reste du catalogue utilise actuellement cet utilisateur de démonstration.
   // À remplacer par l'identifiant issu de la session quand l'authentification sera branchée.
@@ -13,15 +40,24 @@ function Boutiques() {
   const [sort, setSort] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  
+
+
+
 
   useEffect(() => {
     const loadBoutiques = async () => {
+      const token = localStorage.getItem("token");
       try {
         setError("");
         const [response, followedResponse] = await Promise.all([
           fetch("http://localhost:3000/boutiques"),
-          fetch(`http://localhost:3000/boutiques/${userId}/suivies`),
-        ]);
+          fetch(`http://localhost:3000/boutiques/suiviess`, {
+            method: "POST",
+            headers: {
+    Authorization: `Bearer ${token}`,
+  }, }
+   ) ]);
         if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
         const data = await response.json();
         setBoutiques(data?.boutiques ?? []);
@@ -39,7 +75,19 @@ function Boutiques() {
     loadBoutiques();
   }, []);
 
+
+
+
+
+
   const toggleFollow = async (boutiqueId) => {
+     const token = localStorage.getItem("token");
+
+if (!token) {
+    setShowAuthDialog(true);
+  return;
+}
+
     const isFollowed = followedIds.has(boutiqueId);
     setFollowedIds((current) => {
       const next = new Set(current);
@@ -50,8 +98,12 @@ function Boutiques() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/boutiques/${userId}/${boutiqueId}/suivies`,
-        { method: isFollowed ? "DELETE" : "POST" },
+        `http://localhost:3000/boutiques/${boutiqueId}/suivies`,
+        { method: isFollowed ? "DELETE" : "POST" ,
+          headers: {
+    Authorization: `Bearer ${token}`,
+  },
+        },
       );
       const data = await response.json();
       if (!response.ok || !data?.success) throw new Error(data?.message || "Erreur de suivi");
@@ -66,6 +118,13 @@ function Boutiques() {
       setError("La mise à jour du suivi n’a pas pu être enregistrée.");
     }
   };
+
+
+
+
+
+
+
 
   const displayedBoutiques = useMemo(() => {
     const term = search.trim().toLocaleLowerCase();
@@ -157,6 +216,14 @@ function Boutiques() {
             );
           })}
         </div>
+        <AuthDialog
+          isOpen={showAuthDialog}
+          onConfirm={() => {
+            setShowAuthDialog(false);
+            navigate('/login');
+          }}
+          onCancel={() => setShowAuthDialog(false)}
+        />
       </section>
     </main>
   );

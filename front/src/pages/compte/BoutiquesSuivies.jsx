@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 const API_URL = "http://localhost:3000";
 
 function BoutiquesSuivies() {
-  const { id: userId } = useParams();
+ 
   const navigate = useNavigate();
   const [boutiques, setBoutiques] = useState([]);
   const [search, setSearch] = useState("");
@@ -13,13 +13,17 @@ function BoutiquesSuivies() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [removingId, setRemovingId] = useState(null);
+  const token = localStorage.getItem('token');
+
+
+  useEffect(() => {
+  if (!token) {
+    navigate("/login", { replace: true });
+  }
+}, [token, navigate]);
 
   const loadBoutiques = useCallback(async () => {
-    if (!userId) {
-      setError("Utilisateur introuvable.");
-      setLoading(false);
-      return;
-    }
+   
 
     setLoading(true);
     setError("");
@@ -28,7 +32,11 @@ function BoutiquesSuivies() {
       if (search.trim()) params.set("search", search.trim());
       if (sort) params.set("sort", sort);
       const response = await fetch(
-        `${API_URL}/boutiques/${userId}/suivies?${params.toString()}`,
+        `${API_URL}/boutiques/suiviess?${params.toString()}`,{
+          method: "POST", 
+          headers: { Authorization: `Bearer ${token}` },
+        }
+
       );
       if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
       const data = await response.json();
@@ -40,7 +48,7 @@ function BoutiquesSuivies() {
     } finally {
       setLoading(false);
     }
-  }, [search, sort, userId]);
+  }, [search, sort]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(loadBoutiques, 250);
@@ -66,8 +74,10 @@ function BoutiquesSuivies() {
     setError("");
     try {
       const response = await fetch(
-        `${API_URL}/boutiques/${userId}/${boutiqueId}/suivies`,
-        { method: "DELETE" },
+        `${API_URL}/boutiques/${boutiqueId}/suivies`,
+        { method: "DELETE" , 
+           headers: { Authorization: `Bearer ${token}` },
+         },
       );
       if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
       const data = await response.json();

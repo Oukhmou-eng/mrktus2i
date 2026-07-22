@@ -1,6 +1,6 @@
 import "../../css/Notifications.css";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const notificationMeta = {
   commande: { icon: "📦", label: "Commande" },
@@ -38,19 +38,21 @@ function Notifications() {
   const [error, setError] = useState("");
   const [isMarkingAll, setIsMarkingAll] = useState(false);
   const navigate = useNavigate();
-  const { id } = useParams();
+
+  const token = localStorage.getItem("token");
 
   const handleGetNotifications = async () => {
-    if (!id) {
-      setError("Utilisateur introuvable.");
-      setLoading(false);
+    if (!token) {
+      navigate("/login", { replace: true });
       return;
     }
 
     try {
       setLoading(true);
       setError("");
-      const res = await fetch(`http://localhost:3000/notifications/${id}`);
+      const res = await fetch(`http://localhost:3000/notifications/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
 
       const data = await res.json();
@@ -66,7 +68,7 @@ function Notifications() {
 
   useEffect(() => {
     handleGetNotifications();
-  }, [id]);
+  }, []);
 
   const unreadCount = info.filter((notification) => !Boolean(notification.lu)).length;
   const notifications = info.filter(
@@ -90,7 +92,10 @@ function Notifications() {
     try {
       const res = await fetch(`http://localhost:3000/notifications/${notificationId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ lu: true }),
       });
       if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
@@ -108,7 +113,7 @@ function Notifications() {
   };
 
   const markAllAsRead = async () => {
-    if (!id || unreadCount === 0) return;
+    if (!token || unreadCount === 0) return;
 
     const previousNotifications = info;
     setIsMarkingAll(true);
@@ -116,10 +121,10 @@ function Notifications() {
     setInfo((current) => current.map((notification) => ({ ...notification, lu: true })));
 
     try {
-      const res = await fetch(
-        `http://localhost:3000/notifications/user/${id}/read-all`,
-        { method: "PATCH" },
-      );
+      const res = await fetch(`http://localhost:3000/notifications/user/read-all`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
     } catch (requestError) {
       console.error("Erreur lors de la lecture des notifications :", requestError);
@@ -144,42 +149,89 @@ function Notifications() {
             <h1 id="notifications-title">Notifications</h1>
             <p>Suivez les nouveautés liées à vos commandes, boutiques et échanges.</p>
           </div>
-          <button className="notifications__read-all" onClick={markAllAsRead} disabled={!unreadCount || isMarkingAll}>
+          <button
+            className="notifications__read-all"
+            onClick={markAllAsRead}
+            disabled={!unreadCount || isMarkingAll}
+          >
             {isMarkingAll ? "Mise à jour…" : "Tout marquer comme lu"}
           </button>
         </header>
 
         <div className="notifications__toolbar">
           <div className="notifications__filters">
-            <button className={filter === "all" ? "is-active" : ""} onClick={() => setFilter("all")}>Toutes <span>{info.length}</span></button>
-            <button className={filter === "unread" ? "is-active" : ""} onClick={() => setFilter("unread")}>Non lues <span>{unreadCount}</span></button>
+            <button
+              className={filter === "all" ? "is-active" : ""}
+              onClick={() => setFilter("all")}
+            >
+              Toutes <span>{info.length}</span>
+            </button>
+            <button
+              className={filter === "unread" ? "is-active" : ""}
+              onClick={() => setFilter("unread")}
+            >
+              Non lues <span>{unreadCount}</span>
+            </button>
           </div>
-          {unreadCount > 0 && <span className="notifications__unread-count">{unreadCount} nouvelle{unreadCount > 1 ? "s" : ""}</span>}
+          {unreadCount > 0 && (
+            <span className="notifications__unread-count">
+              {unreadCount} nouvelle{unreadCount > 1 ? "s" : ""}
+            </span>
+          )}
         </div>
 
-        {error && <div className="notifications__notice notifications__notice--error">{error}</div>}
-        {loading && <div className="notifications__notice">Chargement de vos notifications…</div>}
+        {error && (
+          <div className="notifications__notice notifications__notice--error">{error}</div>
+        )}
+        {loading && (
+          <div className="notifications__notice">Chargement de vos notifications…</div>
+        )}
 
         {!loading && !error && notifications.length === 0 && (
           <div className="notifications__empty">
             <span aria-hidden="true">🔔</span>
             <h2>{filter === "unread" ? "Tout est à jour" : "Aucune notification pour le moment"}</h2>
-            <p>{filter === "unread" ? "Vous avez lu toutes vos notifications." : "Les informations importantes apparaîtront ici."}</p>
+            <p>
+              {filter === "unread"
+                ? "Vous avez lu toutes vos notifications."
+                : "Les informations importantes apparaîtront ici."}
+            </p>
           </div>
         )}
 
         <div className="notifications__list">
           {notifications.map((notification) => {
-            const meta = notificationMeta[String(notification.type).toLowerCase()] ?? notificationMeta.default;
+            const meta =
+              notificationMeta[String(notification.type).toLowerCase()] ??
+              notificationMeta.default;
             return (
-              <article className={`notification-card ${Boolean(notification.lu) ? "is-read" : "is-unread"}`} key={notification.id_notification}>
-                <div className="notification-card__icon" aria-hidden="true">{meta.icon}</div>
-                <button className="notification-card__content" onClick={() => openNotification(notification)}>
+              <article
+                className={`notification-card ${
+                  Boolean(notification.lu) ? "is-read" : "is-unread"
+                }`}
+                key={notification.id_notification}
+              >
+                <div className="notification-card__icon" aria-hidden="true">
+                  {meta.icon}
+                </div>
+                <button
+                  className="notification-card__content"
+                  onClick={() => openNotification(notification)}
+                >
                   <span className="notification-card__type">{meta.label}</span>
                   <span className="notification-card__text">{notification.contenu}</span>
-                  <time dateTime={notification.date_creation}>{formatDate(notification.date_creation)}</time>
+                  <time dateTime={notification.date_creation}>
+                    {formatDate(notification.date_creation)}
+                  </time>
                 </button>
-                {!Boolean(notification.lu) && <button className="notification-card__mark-read" onClick={() => markAsRead(notification.id_notification)}>Marquer comme lue</button>}
+                {!Boolean(notification.lu) && (
+                  <button
+                    className="notification-card__mark-read"
+                    onClick={() => markAsRead(notification.id_notification)}
+                  >
+                    Marquer comme lue
+                  </button>
+                )}
               </article>
             );
           })}

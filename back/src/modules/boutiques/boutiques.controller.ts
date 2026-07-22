@@ -11,19 +11,20 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 @Controller('boutiques')
 export class BoutiquesController {
   constructor(private readonly boutiquesService: BoutiquesService) {}
-
+ @UseGuards(JwtAuthGuard)
   @Post()
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'logo', maxCount: 1 },
     { name: 'banniere', maxCount: 1 },
   ], { limits: { fileSize: 5 * 1024 * 1024 } }))
   async create(
+     @CurrentUser() user: { id_user: number },
     @Body() dto: CreateBoutiqueDto,
     @UploadedFiles() files: Record<string, Array<{ buffer: Buffer; originalname: string; mimetype: string }>>,
   ) {
     dto.logo_url = await this.saveImage(files?.logo?.[0], 'logo');
     dto.banniere_url = await this.saveImage(files?.banniere?.[0], 'banniere');
-    return this.boutiquesService.create(dto);
+    return this.boutiquesService.create(user.id_user,dto);
   }
 
   private async saveImage(file: { buffer: Buffer; originalname: string; mimetype: string } | undefined, prefix: string) {
@@ -36,6 +37,11 @@ export class BoutiquesController {
     await writeFile(join(directory, filename), file.buffer);
     return `http://localhost:${process.env.PORT || 3000}/uploads/boutiques/${filename}`;
   }
+
+
+
+
+
 
   @Post('trie')
   trie(@Body() body: any) {
@@ -52,30 +58,62 @@ export class BoutiquesController {
     return this.boutiquesService.findAll();
   }
 
-  @Get(':id/suivies')
+@UseGuards(JwtAuthGuard)
+@Get(':boutiqueId/suiviestest')
+checkFollow(
+  @CurrentUser() user: { id_user: number },
+  @Param('boutiqueId') boutiqueId: string,
+) {
+  return this.boutiquesService.checkFollow(user.id_user, +boutiqueId);
+}
+
+
+
+ @UseGuards(JwtAuthGuard)
+  @Post('suiviess')
   getFollowed(
-    @Param('id') id: string,
+    @CurrentUser() user: { id_user: number },
+   
     @Query('search') search?: string,
     @Query('sort') sort?: string,
   ) {
-    return this.boutiquesService.getBS(+id, search, sort);
+    return this.boutiquesService.getBS(user.id_user, search, sort);
   }
 
-  @Delete(':userId/:boutiqueId/suivies')
+
+
+
+
+
+
+
+
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':boutiqueId/suivies')
   removeFollow(
-    @Param('userId') userId: string,
+    @CurrentUser() user: { id_user: number },
     @Param('boutiqueId') boutiqueId: string,
   ) {
-    return this.boutiquesService.removeFollow(+userId, +boutiqueId);
+    return this.boutiquesService.removeFollow(user.id_user, +boutiqueId);
   }
 
-  @Post(':userId/:boutiqueId/suivies')
+
+
+ @UseGuards(JwtAuthGuard)
+  @Post(':boutiqueId/suivies')
   addFollow(
-    @Param('userId') userId: string,
+    @CurrentUser() user: { id_user: number },
+    
     @Param('boutiqueId') boutiqueId: string,
   ) {
-    return this.boutiquesService.addFollow(+userId, +boutiqueId);
+    return this.boutiquesService.addFollow(user.id_user, +boutiqueId);
   }
+
+
+
+
+
 
   @Get(':id/avis')
   getAvis(@Param('id') id: string) {
@@ -130,4 +168,22 @@ export class BoutiquesController {
   remove(@Param('id') id: string) {
     return this.boutiquesService.remove(+id);
   }
+
+
+  @UseGuards(JwtAuthGuard)
+@Get('mes-boutiques')
+getMesBoutiques(@CurrentUser() user: { id_user: number }) {
+  return this.boutiquesService.getMesBoutiques(user.id_user);
+}
+
+
+
+  @UseGuards(JwtAuthGuard)
+@Get('mes-boutiques/:id')
+getMesBoutiquesid(
+  @CurrentUser() user: { id_user: number },
+  @Param('id') id: number,
+) {
+  return this.boutiquesService.getMesBoutiquesid(user.id_user, id);
+}
 }

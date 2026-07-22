@@ -107,6 +107,7 @@ export class AuthService {
     return {
         token,
         nom : user.nom + user.prenom,
+        email: user.email,
         role : user.role , 
       
         message: 'connexion bien realiser  '
