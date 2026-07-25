@@ -36,7 +36,7 @@ function VendeurSidebar() {
     };
 
     fetchBoutiqueActive();
-  }, [token]);
+  },[id_b]);
 
 
 
@@ -46,7 +46,7 @@ function VendeurSidebar() {
 
 
   const retourVersAcheteur = () => {
-    navigate('/home');
+    navigate('/espConnecter');
   };
 
   const deconnecter = () => {
@@ -120,7 +120,7 @@ function VendeurSidebar() {
         </NavLink>
         <NavLink
           className={({ isActive }) => `snav-item ${isActive ? 'active' : ''}`}
-          to="/messages-vendeur"
+          to="/messages"
         >
           <span className="ic">💬</span>Messages
         </NavLink>

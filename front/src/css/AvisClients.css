@@ -1,0 +1,97 @@
+/* =========================================================
+   Page "Avis clients" — espace vendeur.
+   Ce fichier ne redéfinit ni la navbar ni la sidebar
+   (déjà fournies par VendeurLayout / PublicLayout) :
+   uniquement le contenu propre à cette page, avec des classes
+   préfixées "avis-" pour éviter toute collision avec
+   .rail / .sidebar / .shop-card définis ailleurs.
+   ========================================================= */
+
+.avis-page{ flex:1; padding:24px 32px 60px; }
+
+.avis-topline{ display:flex; align-items:center; justify-content:space-between; margin-bottom:26px; }
+.avis-kicker{ font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--teal); font-weight:600; }
+.avis-page h1{ font-family:'Fraunces', serif; font-weight:600; font-size:26px; margin:4px 0 0; }
+
+/* ---- Résumé de notation ---- */
+.avis-summary{
+  display:flex; align-items:center; gap:40px; background:var(--panel); border:1px solid var(--line);
+  border-radius:16px; padding:30px; margin-bottom:30px; flex-wrap:wrap;
+}
+.avis-score{ text-align:center; }
+.avis-score-num{ font-family:'Fraunces', serif; font-size:48px; color:var(--ink); line-height:1; }
+.avis-stars-lg{ color:var(--amber); font-size:20px; margin-top:8px; letter-spacing:2px; }
+.avis-score-total{ font-size:12px; color:var(--ink-soft); margin-top:4px; }
+
+.avis-bars{ flex:1; min-width:220px; display:flex; flex-direction:column; gap:8px; }
+.avis-bar-row{ display:flex; align-items:center; gap:12px; font-size:12px; color:var(--ink-soft); }
+.avis-bar-row span:first-child{ width:64px; flex-shrink:0; }
+.avis-bar-row span:last-child{ width:34px; flex-shrink:0; text-align:right; }
+.avis-bar-bg{ flex:1; height:8px; background:var(--surface-soft, #F1F0EA); border-radius:4px; overflow:hidden; }
+.avis-bar-fill{ height:100%; background:var(--amber); border-radius:4px; }
+
+/* ---- États chargement / erreur / vide ---- */
+.avis-loading{ text-align:center; padding:60px 20px; font-size:13.5px; color:var(--ink-soft); }
+.avis-error{
+  display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; padding:60px 20px;
+  background:var(--panel); border:1px solid var(--line); border-radius:16px;
+}
+.avis-error p{ font-size:13.5px; color:var(--ink-soft); margin:0; }
+.avis-retry-btn{
+  background:var(--teal); color:#fff; border:none; border-radius:9px; padding:10px 20px; font-size:13px;
+  font-weight:600; cursor:pointer;
+}
+.avis-retry-btn:hover{ background:var(--teal-dark); }
+.avis-empty{
+  text-align:center; padding:60px 20px; color:var(--ink-soft); font-size:13.5px; background:var(--panel);
+  border:1px solid var(--line); border-radius:16px;
+}
+
+/* ---- Carte avis ---- */
+.avis-card{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:24px; margin-bottom:16px; }
+.avis-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px; }
+.avis-user{ display:flex; align-items:center; gap:12px; }
+.avis-ava{
+  width:40px; height:40px; border-radius:50%; background:var(--surface-soft, #F1F0EA); color:var(--ink);
+  display:flex; align-items:center; justify-content:center; font-weight:600; font-size:13px; flex-shrink:0;
+}
+.avis-user-name{ font-weight:600; font-size:14px; }
+.avis-date{ font-size:12px; color:var(--ink-soft); white-space:nowrap; }
+.avis-stars-sm{ color:var(--amber); font-size:14px; letter-spacing:1px; }
+
+.avis-body{ font-size:14px; line-height:1.6; color:var(--ink); margin-bottom:16px; }
+.avis-product-tag{
+  font-size:12px; color:var(--ink-soft); background:var(--surface-soft-alt, #F9FBFA); padding:8px 12px; border-radius:8px;
+  display:inline-block;
+}
+
+/* ---- Bloc réponse ---- */
+.avis-reply{ border-top:1px solid var(--line); padding-top:16px; margin-top:16px; }
+
+.avis-reply-btn{
+  font-size:12px; font-weight:600; color:var(--teal); cursor:pointer; background:none; border:none; padding:0;
+}
+.avis-reply-btn:hover{ color:var(--teal-dark); text-decoration:underline; }
+
+.avis-reply-existing-label{ font-size:13px; color:var(--ink-soft); font-style:italic; margin-bottom:8px; }
+.avis-reply-existing-text{ font-size:14px; border-left:2px solid var(--teal); padding-left:12px; color:var(--ink); }
+
+.avis-reply-form{ display:flex; flex-direction:column; gap:10px; }
+.avis-reply-textarea{
+  width:100%; border:1px solid var(--line); border-radius:9px; padding:10px 12px; font-size:13px;
+  font-family:'Sora', sans-serif; color:var(--ink); resize:vertical; outline:none;
+}
+.avis-reply-textarea:focus{ border-color:var(--teal); }
+
+.avis-reply-actions{ display:flex; justify-content:flex-end; gap:10px; }
+.avis-reply-cancel{
+  background:none; border:1px solid var(--line); border-radius:8px; padding:8px 14px; font-size:12.5px;
+  font-weight:600; color:var(--ink); cursor:pointer;
+}
+.avis-reply-cancel:hover{ background:var(--surface-soft, #F1F0EA); }
+.avis-reply-submit{
+  background:var(--teal); color:#fff; border:none; border-radius:8px; padding:8px 16px; font-size:12.5px;
+  font-weight:600; cursor:pointer;
+}
+.avis-reply-submit:hover{ background:var(--teal-dark); }
+.avis-reply-submit:disabled{ background:var(--line); color:var(--ink-soft); cursor:not-allowed; }

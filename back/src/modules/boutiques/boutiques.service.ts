@@ -1,5 +1,4 @@
-﻿import { Injectable } from '@nestjs/common';
-import { ConflictException } from '@nestjs/common';
+﻿import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { CreateBoutiqueDto } from './dto/create-boutique.dto';
 import { DatabaseService } from '../../database/database.service';
@@ -367,17 +366,74 @@ async getAvis(id: number) {
   try {
     const avis = await this.db.query(
       `
-      SELECT U.nom,U.prenom,U.logo_url, A.commentaire, A.note FROM  avis A JOIN utilisateurs U ON A.id_user = U.id_user WHERE A.type_cible = 'boutique' AND A.id_cible = ?
+      SELECT
+        A.id_avis,
+        U.nom,
+        U.prenom,
+        U.logo_url,
+        A.commentaire,
+        A.note,
+        A.date_creation,
+        R.reponse
+      FROM avis A
+      JOIN utilisateurs U ON A.id_user = U.id_user
+      LEFT JOIN reponses_avis R
+        ON R.id_avis = A.id_avis
+        AND R.id_boutique = ?
+      WHERE A.type_cible = 'boutique'
+        AND A.id_cible = ?
+      ORDER BY A.date_creation DESC
       `,
-      [id]
+      [id, id],
     );
-    return { avis: avis ?? []  };
+    return { avis: avis ?? [] };
   } catch (error) {
     console.error('Erreur getAvis:', error);
     return { avis: [] };
   }
 }
 
+async respondToAvis(boutiqueId: number, avisId: number, reponse: string, userId: number) {
+  if (!reponse?.trim()) {
+    throw new BadRequestException('La réponse ne peut pas être vide.');
+  }
+
+  const boutique = await this.db.query(
+    `SELECT id_boutique FROM boutiques WHERE id_boutique = ? AND id_user = ?`,
+    [boutiqueId, userId],
+  );
+
+  if (!boutique?.length) {
+    throw new BadRequestException('Boutique introuvable ou accès refusé.');
+  }
+
+  const avis = await this.db.query(
+    `SELECT id_avis FROM avis WHERE id_avis = ? AND type_cible = 'boutique' AND id_cible = ?`,
+    [avisId, boutiqueId],
+  );
+
+  if (!avis?.length) {
+    throw new BadRequestException('Avis introuvable pour cette boutique.');
+  }
+
+  await this.db.query(
+    `
+      INSERT INTO reponses_avis (id_avis, id_boutique, reponse)
+      VALUES (?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        reponse = VALUES(reponse),
+        date_modification = NOW()
+    `,
+    [avisId, boutiqueId, reponse.trim()],
+  );
+
+  const [result] = await this.db.query<{ reponse: string }[]>(
+    `SELECT reponse FROM reponses_avis WHERE id_avis = ? AND id_boutique = ?`,
+    [avisId, boutiqueId],
+  );
+
+  return { reponse: result?.reponse ?? reponse.trim() };
+}
 
 
 async ajouterAvis(id: number, note: number, commentaire: string, userId: number) {

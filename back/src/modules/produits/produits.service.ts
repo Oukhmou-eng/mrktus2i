@@ -8,9 +8,12 @@ import { DatabaseService } from '../../database/database.service';
 export class ProduitsService {
   constructor(private readonly db: DatabaseService) {}
 
-  async create(dto: CreateProduitDto, medias: Array<{ type: 'image' | 'video'; url: string; ordre: number }>) {
+  async create(
+    dto: CreateProduitDto,
+    medias: Array<{ type: 'image' | 'video'; url: string; ordre: number }>,
+    idUser: number,
+  ) {
     const connection = await this.db.getPool().getConnection();
-    const idUser = 1;
 
     try {
       await connection.beginTransaction();
@@ -80,7 +83,7 @@ export class ProduitsService {
           LIMIT 1
         )
         LEFT JOIN commande_lignes cl ON cl.id_produit = p.id_produit
-        WHERE b.id_user = ?
+        WHERE p.id_boutique = ?
         GROUP BY p.id_produit, p.nom, p.prix, p.stock, p.statut, p.id_categorie,
                  c.nom, b.nom, pm.url
         ORDER BY p.date_creation DESC, p.id_produit DESC`,
@@ -95,55 +98,141 @@ export class ProduitsService {
   }
 
   async findOne(id: number) {
-  try {
-    const produits = await this.db.query(
-      `
-      SELECT
-        p.id_produit,
-        p.nom,
-        p.description,
-        p.prix,
-        p.id_boutique,
-        b.nom AS boutique_nom
-      FROM produits p
-      INNER JOIN boutiques b
-        ON b.id_boutique = p.id_boutique
-      WHERE p.id_produit = ?
-      LIMIT 1
-      `,
-      [id],
-    );
+    try {
+      const produits = await this.db.query(
+        `
+        SELECT
+          p.id_produit,
+          p.nom,
+          p.description,
+          p.prix,
+          p.stock,
+          p.statut,
+          p.id_boutique,
+          p.id_categorie,
+          c.nom AS categorie_nom,
+          b.nom AS boutique_nom
+        FROM produits p
+        INNER JOIN boutiques b
+          ON b.id_boutique = p.id_boutique
+        LEFT JOIN categories c
+          ON c.id_categorie = p.id_categorie
+        WHERE p.id_produit = ?
+        LIMIT 1
+        `,
+        [id],
+      );
 
-    if (produits.length === 0) {
-      return null;
+      if (produits.length === 0) {
+        return null;
+      }
+
+      const medias = await this.db.query(
+        `
+        SELECT
+          type,
+          url,
+          ordre
+        FROM produit_medias
+        WHERE id_produit = ?
+        ORDER BY ordre ASC, id_media ASC
+        `,
+        [id],
+      );
+
+      return {
+        ...produits[0],
+        medias,
+      };
+    } catch (error) {
+      console.error('Erreur findOne :', error);
+      throw error;
     }
-
-    const medias = await this.db.query(
-      `
-      SELECT
-        type,
-        url,
-        ordre
-      FROM produit_medias
-      WHERE id_produit = ?
-      ORDER BY ordre ASC, id_media ASC
-      `,
-      [id],
-    );
-
-    return {
-      ...produits[0],
-      medias,
-    };
-  } catch (error) {
-    console.error('Erreur findOne :', error);
-    throw error;
   }
-}
 
-  update(id: number, dto: Partial<CreateProduitDto>) {
-    // TODO: this.prisma.produits.update({ where: { id }, data: dto })
-    return { id, ...dto };
+  async update(id: number, dto: Partial<CreateProduitDto>, medias: Array<{ type: 'image' | 'video'; url: string; ordre: number }> = [], idUser?: number) {
+    const connection = await this.db.getPool().getConnection();
+    try {
+      await connection.beginTransaction();
+
+      if (typeof idUser === 'number') {
+        const [ownedBoutiques] = await connection.execute<(RowDataPacket & { id_boutique: number })[]>(
+          `SELECT p.id_boutique FROM produits p
+           INNER JOIN boutiques b ON b.id_boutique = p.id_boutique
+           WHERE p.id_produit = ? AND b.id_user = ? LIMIT 1`,
+          [id, idUser],
+        );
+        if (!ownedBoutiques.length) {
+          throw new BadRequestException('Produit introuvable ou accès non autorisé.');
+        }
+      }
+
+      const updates: string[] = [];
+      const params: Array<string | number | null> = [];
+
+      if (dto.nom !== undefined) {
+        updates.push('nom = ?');
+        params.push(dto.nom.trim());
+      }
+      if (dto.description !== undefined) {
+        updates.push('description = ?');
+        params.push(dto.description?.trim() || null);
+      }
+      if (dto.prix !== undefined) {
+        updates.push('prix = ?');
+        params.push(dto.prix);
+      }
+      if (dto.stock !== undefined) {
+        updates.push('stock = ?');
+        params.push(dto.stock);
+      }
+      if (dto.statut !== undefined) {
+        updates.push('statut = ?');
+        params.push(dto.statut);
+      }
+      if (dto.categorie !== undefined) {
+        const [categories] = await connection.execute<(RowDataPacket & { id_categorie: number })[]>(
+          'SELECT id_categorie FROM categories WHERE LOWER(nom) = LOWER(?) LIMIT 1',
+          [dto.categorie.trim()],
+        );
+        if (!categories.length) {
+          throw new BadRequestException('La catégorie sélectionnée est introuvable.');
+        }
+        updates.push('id_categorie = ?');
+        params.push(categories[0].id_categorie);
+      }
+
+      if (updates.length > 0) {
+        params.push(id);
+        await connection.execute(
+          `UPDATE produits SET ${updates.join(', ')} WHERE id_produit = ?`,
+          params,
+        );
+      }
+
+      if (medias.length) {
+        const [existing] = await connection.execute<(RowDataPacket & { maxOrdre: number })[]>(
+          'SELECT MAX(ordre) AS maxOrdre FROM produit_medias WHERE id_produit = ?',
+          [id],
+        );
+        let nextOrdre = existing?.[0]?.maxOrdre ?? -1;
+        for (const media of medias) {
+          nextOrdre += 1;
+          await connection.execute(
+            'INSERT INTO produit_medias (id_produit, type, url, ordre) VALUES (?, ?, ?, ?)',
+            [id, media.type, media.url, nextOrdre],
+          );
+        }
+      }
+
+      await connection.commit();
+      return this.findOne(id);
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   async remove(id: number) {

@@ -254,7 +254,7 @@ async findSoldes(page: number = 1) {
           LIMIT 1
         )
       WHERE
-        s.statut = 'active'
+        s.statut IN ('active', 'en_attente')
         AND p.statut = 'en_ligne'
         AND NOW() BETWEEN s.date_debut AND s.date_fin
       ORDER BY s.date_creation DESC
@@ -270,7 +270,7 @@ async findSoldes(page: number = 1) {
       INNER JOIN produits p
         ON p.id_produit = s.id_produit
       WHERE
-        s.statut = 'active'
+        s.statut IN ('active', 'en_attente')
         AND p.statut = 'en_ligne'
         AND NOW() BETWEEN s.date_debut AND s.date_fin
       `

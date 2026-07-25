@@ -102,15 +102,27 @@ export class AuthService {
         
     };
 
-    const token = this.jwtService.sign(payload);
+    const [boutiqueInfo] = (await this.db.query<any[]>(
+      'SELECT id_boutique FROM boutiques WHERE id_user = ? LIMIT 1',
+      [user.id_user],
+    )) ?? [];
+
+    const token = this.jwtService.sign({
+      sub: user.id_user,
+      email: user.email,
+      role: user.role,
+      id_boutique: boutiqueInfo?.id_boutique ?? null,
+    });
 
     return {
-        token,
-        nom : user.nom + user.prenom,
-        email: user.email,
-        role : user.role , 
-      
-        message: 'connexion bien realiser  '
+      token,
+      id_boutique: boutiqueInfo?.id_boutique ?? null,
+      nom: user.nom,
+      prenom: user.prenom,
+      email: user.email,
+      role: user.role,
+      avatar: user.logo_url,
+      message: 'connexion bien realiser',
     };
-}
+  }
 }

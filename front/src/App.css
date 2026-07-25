@@ -1,0 +1,103 @@
+:root {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+main, #visitorMain {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 24px 16px 60px;
+}
+
+/* Global grid fallback for product card containers */
+.grid,
+.catalogue-grid,
+#homeGrid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(240px, 1fr)) !important;
+  gap: 16px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+@media (max-width: 1200px) {
+  .grid,
+  .catalogue-grid,
+  #homeGrid {
+    grid-template-columns: repeat(3, minmax(220px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .grid,
+  .catalogue-grid,
+  #homeGrid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid,
+  .catalogue-grid,
+  #homeGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+#homeGrid {
+  justify-items: stretch;
+  align-items: stretch;
+}
+
+#homeGrid > .card,
+.grid > .card,
+.catalogue-grid > .card {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0;
+}
+
+.card {
+  box-sizing: border-box;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 22px !important;
+  overflow: hidden;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card .thumb {
+  min-height: 260px;
+}
+
+.card .thumb,
+.card .card-body {
+  width: 100%;
+  max-width: 100%;
+}
+
+.card .card-body {
+  background: transparent !important;
+  padding: 12px 10px 0 !important;
+}
+
+.card .card-body .name,
+.card .card-body .shop,
+.card .card-body .price {
+  color: inherit !important;
+}

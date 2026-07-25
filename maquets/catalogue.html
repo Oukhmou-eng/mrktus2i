@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catalogue | Le Panier Marketplace</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="header-top">
+        <a href="index.html" class="brand-logo"><span class="brand-dot"></span>Le Panier</a>
+        <div class="search-bar-wrap">
+          <span class="search-icon-btn"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+          <input type="text" class="search-input" placeholder="Rechercher un produit...">
+        </div>
+        <div class="header-actions">
+          <a href="vendeur-dashboard.html" class="header-shop-quick-access">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            <span>Ma Boutique</span>
+          </a>
+          <a href="favoris.html" class="nav-icon-link"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></a>
+          <a href="panier.html" class="nav-icon-link"><svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></a>
+          <div class="user-profile-menu">
+            <button class="user-profile-btn">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="user-avatar">
+              <span class="user-name">Sophie M.</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="header-bottom-nav">
+      <div class="container">
+        <div class="nav-links-wrap">
+          <a href="index.html" class="nav-link-item">Accueil</a>
+          <a href="catalogue.html" class="nav-link-item active">Catalogue</a>
+          <a href="soldes.html" class="nav-link-item">Soldes & Promos</a>
+          <a href="boutiques.html" class="nav-link-item">Boutiques</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="catalogue-container">
+    <div class="container">
+      <div class="page-header">
+        <h1 class="page-title">Catalogue des Produits</h1>
+        <p class="page-subtitle">Découvrez notre vaste sélection d'articles réimaginés</p>
+      </div>
+
+      <div class="catalogue-layout">
+        <aside class="filters-sidebar">
+          <div class="filter-section">
+            <h3 class="filter-title">Catégories</h3>
+            <div class="filter-option-list">
+              <label class="checkbox-label"><input type="checkbox" checked> Vêtements & Mode</label>
+              <label class="checkbox-label"><input type="checkbox"> Électronique</label>
+              <label class="checkbox-label"><input type="checkbox"> Maison & Déco</label>
+            </div>
+          </div>
+          <div class="filter-section">
+            <h3 class="filter-title">Prix</h3>
+            <div class="filter-option-list">
+              <label class="checkbox-label"><input type="checkbox"> 0 – 200 MAD</label>
+              <label class="checkbox-label"><input type="checkbox" checked> 200 – 500 MAD</label>
+              <label class="checkbox-label"><input type="checkbox"> 500 MAD +</label>
+            </div>
+          </div>
+        </aside>
+
+        <div>
+          <div class="catalogue-toolbar">
+            <span class="results-count">12 produits disponibles</span>
+            <select class="sort-select">
+              <option>Trier par : Pertinence</option>
+              <option>Prix croissant</option>
+              <option>Prix décroissant</option>
+            </select>
+          </div>
+
+          <div class="products-grid">
+            <div class="product-card">
+              <div class="product-thumb-wrap">
+                <span class="product-badge">Neuf</span>
+                <button class="product-fav-btn active"><svg class="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></button>
+                <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=80" alt="Produit" class="product-img">
+              </div>
+              <div class="product-card-body">
+                <span class="product-shop-name">Atelier Casablanca</span>
+                <h3 class="product-title">T-Shirt Premium Coton Bio</h3>
+                <div class="product-card-footer">
+                  <div class="product-price">250 <span class="product-price-currency">MAD</span></div>
+                  <a href="produit.html" class="btn-view-product">Découvrir</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div class="product-thumb-wrap">
+                <button class="product-fav-btn"><svg class="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></button>
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80" alt="Produit" class="product-img">
+              </div>
+              <div class="product-card-body">
+                <span class="product-shop-name">Urban Sneakers</span>
+                <h3 class="product-title">Baskets Running Édition Limitée</h3>
+                <div class="product-card-footer">
+                  <div class="product-price">690 <span class="product-price-currency">MAD</span></div>
+                  <a href="produit.html" class="btn-view-product">Découvrir</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container"><p>&copy; 2026 Le Panier Marketplace.</p></div>
+  </footer>
+</body>
+</html>

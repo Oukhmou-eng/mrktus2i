@@ -11,11 +11,14 @@ function MesProduits() {
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState(null);
   const navigate = useNavigate();
-  const { id } = useParams();
+  
+
+  const token = localStorage.getItem('token');
+  const id_b =  localStorage.getItem('id_boutique');
 
   const handleGetMesProduits = async () => {
-    if (!id) {
-      setError("Vendeur introuvable.");
+    if (!token) {
+      navigate('/login');
       setLoading(false);
       return;
     }
@@ -23,7 +26,9 @@ function MesProduits() {
     try {
       setLoading(true);
       setError("");
-      const res = await fetch(`http://localhost:3000/produits/${id}/mes-produits`);
+      const res = await fetch(`http://localhost:3000/produits/${id_b}/mes-produits`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
       const data = await res.json();
       setInfo(data?.produits ?? []);
@@ -38,7 +43,7 @@ function MesProduits() {
 
   useEffect(() => {
     handleGetMesProduits();
-  }, [id]);
+  }, [id_b]);
 
   const categories = [...new Set(info.map((produit) => produit.categorie_nom).filter(Boolean))];
   const produits = info.filter((produit) => {
@@ -56,6 +61,7 @@ function MesProduits() {
     try {
       const res = await fetch(`http://localhost:3000/produits/${produitId}`, {
         method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
 
@@ -86,7 +92,7 @@ function MesProduits() {
             <h1 id="my-products-title">Mes produits</h1>
             <p>Gérez les articles proposés dans vos boutiques.</p>
           </div>
-          <button className="btn teal" onClick={() => navigate("/publier-produit")}>+ Ajouter un produit</button>
+          <button className="btn teal" onClick={() => navigate("/publierProduit")}>+ Ajouter un produit</button>
         </header>
 
         <div className="my-products__filters">
@@ -131,7 +137,7 @@ function MesProduits() {
                     <td className="price-cell">{Number(produit.prix).toLocaleString("fr-MA")} MAD</td>
                     <td className={`stock-cell ${Number(produit.stock) <= 2 ? "stock-low" : ""}`}>{produit.stock}</td>
                     <td>{produit.ventes}</td>
-                    <td><div className="actions-cell"><button className="icon-btn" title="Voir le produit" onClick={() => navigate(`/produit/${produit.id_produit}`)}>👁</button><button className="icon-btn icon-btn--danger" title="Supprimer le produit" onClick={() => deleteProduit(produit.id_produit)} disabled={deletingId === produit.id_produit}>{deletingId === produit.id_produit ? "…" : "🗑"}</button></div></td>
+                    <td><div className="actions-cell"><button className="icon-btn" title="Voir le produit" onClick={() => navigate(`/produit/${produit.id_produit}`)}>👁</button><button className="icon-btn" title="Modifier le produit" onClick={() => navigate(`/publierProduit/${produit.id_produit}`)}>✎</button><button className="icon-btn icon-btn--danger" title="Supprimer le produit" onClick={() => deleteProduit(produit.id_produit)} disabled={deletingId === produit.id_produit}>{deletingId === produit.id_produit ? "…" : "🗑"}</button></div></td>
                   </tr>
                 ))}
               </tbody>

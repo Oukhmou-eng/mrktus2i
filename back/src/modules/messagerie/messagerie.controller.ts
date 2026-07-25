@@ -1,33 +1,34 @@
-﻿import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+﻿import { Body, Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { MessagerieService } from './messagerie.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 
-@Controller('messagerie')
+@Controller('messages')
+@UseGuards(JwtAuthGuard)
 export class MessagerieController {
   constructor(private readonly messagerieService: MessagerieService) {}
 
+  @Get('conversations')
+  async getConversations(@Request() req) {
+    const user = req.user;
+    return this.messagerieService.getConversations(user.id_user, user.id_boutique ?? null);
+  }
+
+  @Get('conversations/:id')
+  async getConversationMessages(@Request() req, @Param('id') id: string) {
+    const user = req.user;
+    return this.messagerieService.getMessages(+id, user.id_user, user.id_boutique ?? null);
+  }
+
+  @Post('conversations/:id/lu')
+  async markConversationAsRead(@Request() req, @Param('id') id: string) {
+    const user = req.user;
+    return this.messagerieService.markConversationAsRead(+id, user.id_user, user.id_boutique ?? null);
+  }
+
   @Post()
-  create(@Body() dto: CreateMessageDto) {
-    return this.messagerieService.create(dto);
-  }
-
-  @Get()
-  findAll() {
-    return this.messagerieService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.messagerieService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<CreateMessageDto>) {
-    return this.messagerieService.update(+id, dto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.messagerieService.remove(+id);
+  async create(@Request() req, @Body() dto: CreateMessageDto) {
+    const user = req.user;
+    return this.messagerieService.createMessage(user.id_user, dto, user.id_boutique ?? null);
   }
 }

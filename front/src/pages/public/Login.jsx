@@ -42,6 +42,7 @@ function Login() {
                       localStorage.setItem("nom", data.nom);
                       localStorage.setItem("email", data.email);
                       localStorage.setItem("role", data.role);
+                      localStorage.setItem('avatar',data.avatar); 
 navigate('/espConnecter'); 
 }
 

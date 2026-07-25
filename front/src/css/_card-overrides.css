@@ -1,0 +1,21 @@
+.card {
+  width: auto;
+  max-width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+
+.card .thumb {
+  width: 100%;
+  max-width: 100%;
+}
+
+.card .card-body {
+  width: 100%;
+  max-width: 100%;
+}
+
+#homeGrid .card, .catalogue-grid .card, .grid .card {
+  width: 100%;
+  max-width: 100%;
+}

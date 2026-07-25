@@ -39,15 +39,16 @@ function Comptelayout() {
     localStorage.removeItem('token');
     localStorage.removeItem('nom');
     localStorage.removeItem('email');
-    localStorage.removeItem('role');
+    localStorage.removeItem('role'); 
     localStorage.removeItem("id_boutique");
+    localStorage.removeItem('avatar');
 
     sessionStorage.clear();
     navigate('/home', { replace: true });
   };
 
-  const boutiquesAffichees = boutiques.slice(0, 2);
-  const limiteAtteinte = boutiques.length >= 2;
+  const boutiquesAffichees = boutiques.slice(0, 1);
+  const limiteAtteinte = boutiques.length >= 1;
 
   return (
     <aside className='sidebar' id='sidebar'>
@@ -87,20 +88,11 @@ function Comptelayout() {
         </div>
       )}
 
-      {limiteAtteinte ? (
-        <span
-          className='create-shop-btn create-shop-btn--disabled'
-          title='Vous avez atteint la limite de 2 boutiques'
-          aria-disabled='true'
-        >
-          ➕ Créer ma boutique
-        </span>
-      ) : (
+      {!limiteAtteinte && (
         <Link className='create-shop-btn' to='/creer-boutique' style={{ textDecoration: 'none' }}>
           ➕ Créer ma boutique
         </Link>
       )}
-
       <div className='sidebar-sep'></div>
 
       <nav className='sidebar-nav'>

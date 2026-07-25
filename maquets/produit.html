@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fiche Produit | Le Panier Marketplace</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="header-top">
+        <a href="index.html" class="brand-logo"><span class="brand-dot"></span>Le Panier</a>
+        <div class="header-actions">
+          <a href="vendeur-dashboard.html" class="header-shop-quick-access">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            <span>Ma Boutique</span>
+          </a>
+          <a href="favoris.html" class="nav-icon-link"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></a>
+          <a href="panier.html" class="nav-icon-link"><svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></a>
+          <div class="user-profile-menu">
+            <button class="user-profile-btn">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="user-avatar">
+              <span class="user-name">Sophie M.</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 40px 0;">
+    <div class="container">
+      <div class="product-detail-layout">
+        <!-- Galerie d'images Agrandie (Exigence #5) -->
+        <div class="gallery-container">
+          <div class="gallery-main-view">
+            <button class="gallery-nav-btn prev" title="Photo précédente">
+              <svg class="icon icon-lg" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80" alt="Produit" class="gallery-main-image">
+            <button class="gallery-nav-btn next" title="Photo suivante">
+              <svg class="icon icon-lg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+          <div class="gallery-thumbnails-strip">
+            <div class="gallery-thumb active"><img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200&auto=format&fit=crop&q=80" alt="T1"></div>
+            <div class="gallery-thumb"><img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=200&auto=format&fit=crop&q=80" alt="T2"></div>
+          </div>
+        </div>
+
+        <!-- Détails -->
+        <div class="product-info-panel">
+          <div class="product-shop-badge">Vendu par : <a href="boutique.html">Atelier Casablanca</a></div>
+          <h1 class="product-detail-title">T-Shirt Premium Coton Biologique</h1>
+          <div class="product-detail-price">250 <span>MAD</span></div>
+          <p class="product-description-text">T-shirt éco-conçu en coton bio de haute qualité avec coupe moderne.</p>
+          <div class="product-action-buttons">
+            <button class="btn-primary-action">Ajouter au panier</button>
+            <button class="btn-secondary-action">Contacter le vendeur</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container"><p>&copy; 2026 Le Panier Marketplace.</p></div>
+  </footer>
+</body>
+</html>

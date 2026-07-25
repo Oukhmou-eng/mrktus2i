@@ -120,6 +120,17 @@ checkFollow(
     return this.boutiquesService.getAvis(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/avis/:avisId/reponse')
+  respondToAvis(
+    @Param('id') boutiqueId: string,
+    @Param('avisId') avisId: string,
+    @Body('reponse') reponse: string,
+    @CurrentUser() user: { id_user: number },
+  ) {
+    return this.boutiquesService.respondToAvis(+boutiqueId, +avisId, reponse, user.id_user);
+  }
+
   @Post('search')
   search(@Body() body: any) {
     return this.boutiquesService.search(body.search);

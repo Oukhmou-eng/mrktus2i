@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 --  SCRIPT DE CREATION DE BASE DE DONNEES - MARKETPLACE
 --  MySQL 8.0+
 --  L'ordre des CREATE TABLE respecte les dependances (FK)
@@ -137,6 +137,7 @@ CREATE TABLE PANIER_ITEMS (
     id_user         INT UNSIGNED NOT NULL,
     id_produit      INT UNSIGNED NOT NULL,
     quantite        INT UNSIGNED NOT NULL DEFAULT 1,
+    est_enregistre  TINYINT(1) NOT NULL DEFAULT 0,
     date_ajout      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_panier_items_user
         FOREIGN KEY (id_user) REFERENCES UTILISATEURS(id_user)
@@ -306,7 +307,26 @@ CREATE TABLE AVIS (
 ) ENGINE=InnoDB;
 
 -- ============================================================
--- 16. CONVERSATIONS  (1 UTILISATEUR -> N CONVERSATIONS, 1 BOUTIQUE -> N CONVERSATIONS)
+-- 16. RÉPONSES AUX AVIS  (1 AVIS -> 1 RÉPONSE, 1 BOUTIQUE -> N RÉPONSES)
+-- ============================================================
+CREATE TABLE reponses_avis (
+    id_reponse          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_avis             INT UNSIGNED NOT NULL,
+    id_boutique         INT UNSIGNED NOT NULL,
+    reponse             TEXT NOT NULL,
+    date_creation       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_modification   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_reponses_avis_avis
+        FOREIGN KEY (id_avis) REFERENCES AVIS(id_avis)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_reponses_avis_boutique
+        FOREIGN KEY (id_boutique) REFERENCES BOUTIQUES(id_boutique)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT uq_reponses_avis_avis_boutique UNIQUE (id_avis, id_boutique)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 17. CONVERSATIONS  (1 UTILISATEUR -> N CONVERSATIONS, 1 BOUTIQUE -> N CONVERSATIONS)
 -- ============================================================
 CREATE TABLE CONVERSATIONS (
     id_conversation INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -509,3 +529,5 @@ CREATE INDEX idx_commande_lignes_commande ON COMMANDE_LIGNES(id_commande);
 CREATE INDEX idx_messages_conversation ON MESSAGES(id_conversation);
 CREATE INDEX idx_notifications_user_lu ON NOTIFICATIONS(id_user, lu);
 CREATE INDEX idx_signalements_cible ON SIGNALEMENTS(type_cible, id_cible);
+
+

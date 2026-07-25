@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import '../../css/PublierProduit.css';
 
 const MAX_VIDEOS = 1;
 const API_URL = 'http://localhost:3000';
+const token = localStorage.getItem('token');
+const id_boutique = localStorage.getItem('id_boutique');
 
 const initialForm = {
   nom: '',
@@ -14,11 +17,18 @@ const initialForm = {
 };
 
 function PublierProduit() {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
   const [categories, setCategories] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loadingProduct, setLoadingProduct] = useState(false);
+  const [productStatus, setProductStatus] = useState('en_ligne');
+
+  const title = id ? 'Modifier le produit' : 'Publier un produit';
 
   // Un seul tableau, ordre = ordre d'affichage. media[0] = couverture (image OU vidéo).
-  // Chaque élément : { file: File, url: string (aperçu), type: 'image' | 'video' }
+  // Chaque élément : { file: File|null, url: string (aperçu), type: 'image' | 'video', existing?: boolean }
   const [media, setMedia] = useState([]);
 
   const [error, setError] = useState('');
@@ -42,6 +52,36 @@ function PublierProduit() {
     };
     loadCategories();
   }, []);
+
+  useEffect(() => {
+    const loadProduct = async () => {
+      if (!id) return;
+      setIsEditing(true);
+      setLoadingProduct(true);
+      try {
+        const response = await fetch(`${API_URL}/produits/${id}`);
+        if (!response.ok) throw new Error('Impossible de charger le produit.');
+        const product = await response.json();
+        setForm({
+          nom: product.nom || '',
+          categorie: product.categorie_nom || product.categorie || '',
+          prix: product.prix ?? '',
+          stock: product.stock ?? '',
+          description: product.description || '',
+          optionsPaiement: '',
+        });
+        setProductStatus(product.statut || 'en_ligne');
+        setMedia((product.medias ?? []).map((item) => ({ url: item.url, type: item.type, file: null, existing: true })));
+      } catch (loadError) {
+        console.error('Erreur de chargement du produit :', loadError);
+        setError(loadError.message || 'Impossible de charger le produit.');
+      } finally {
+        setLoadingProduct(false);
+      }
+    };
+
+    loadProduct();
+  }, [id]);
 
   const handleFilesSelected = (event) => {
     const files = Array.from(event.target.files || []);
@@ -85,21 +125,49 @@ function PublierProduit() {
     setSubmitting(true);
 
     try {
-      const payload = new FormData();
-      Object.entries(form).forEach(([name, value]) => {
-        if (name !== 'optionsPaiement') payload.append(name, value);
-      });
-      payload.append('statut', statut);
-      media.forEach((item) => payload.append('medias', item.file));
-      const response = await fetch(`${API_URL}/produits`, { method: 'POST', body: payload });
+      const hasFiles = media.some((item) => item.file instanceof File);
+      const url = id ? `${API_URL}/produits/${id}` : `${API_URL}/produits`;
+      const method = id ? 'PATCH' : 'POST';
+      let response;
+
+      if (id && !hasFiles) {
+        const body = {
+          ...form,
+          statut: statut || productStatus,
+        };
+        response = await fetch(url, {
+          method,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+      } else {
+        const payload = new FormData();
+        Object.entries(form).forEach(([name, value]) => {
+          if (name !== 'optionsPaiement') payload.append(name, value);
+        });
+        payload.append('statut', statut || productStatus);
+        media.forEach((item) => {
+          if (item.file instanceof File) payload.append('medias', item.file);
+        });
+        response = await fetch(url, {
+          method,
+          headers: { Authorization: `Bearer ${token}` },
+          body: payload,
+        });
+      }
+
       const data = await response.json();
       if (!response.ok) {
         const message = Array.isArray(data?.message) ? data.message.join(' ') : data?.message;
         throw new Error(message || 'Impossible d’enregistrer le produit.');
       }
-      media.forEach((item) => URL.revokeObjectURL(item.url));
-      setMedia([]);
+      media.forEach((item) => { if (item.file instanceof File) URL.revokeObjectURL(item.url); });
+      setMedia(media.filter((item) => item.existing));
       setForm(initialForm);
+      if (id) navigate('/mes-produits');
     } catch (requestError) {
       setError(requestError.message || 'Impossible d’enregistrer le produit. Réessayez dans un instant.');
     } finally {
@@ -108,12 +176,26 @@ function PublierProduit() {
   };
   const videoCount = media.filter((item) => item.type === 'video').length;
 
+  if (id && loadingProduct) {
+    return (
+      <main className="content-area">
+        <div className="topline">
+          <div>
+            <span className="kicker">Chargement</span>
+            <h1>{title}</h1>
+          </div>
+        </div>
+        <div className="form-card">Chargement du produit en cours…</div>
+      </main>
+    );
+  }
+
   return (
     <main className="content-area">
       <div className="topline">
         <div>
-          <span className="kicker">Nouveau</span>
-          <h1>Publier un produit</h1>
+          <span className="kicker">{id ? 'Modification' : 'Nouveau'}</span>
+          <h1>{title}</h1>
         </div>
       </div>
 
@@ -169,6 +251,18 @@ function PublierProduit() {
                 />
               </div>
             </div>
+
+            {isEditing && (
+              <div className="field">
+                <label>Statut du produit</label>
+                <select value={productStatus} onChange={(event) => setProductStatus(event.target.value)}>
+                  <option value="en_ligne">En ligne</option>
+                  <option value="brouillon">Brouillon</option>
+                  <option value="rupture">Hors stock</option>
+                  <option value="archive">Archivé</option>
+                </select>
+              </div>
+            )}
 
             <div className="field">
               <label>Description</label>

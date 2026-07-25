@@ -1,5 +1,6 @@
-import "../../css/Home.css";
 import "../../css/Favoris.css";
+import "../../css/Home.css";
+
 import "../../css/Dialogue.css";
 import { useState } from "react";
 import { useEffect } from 'react';

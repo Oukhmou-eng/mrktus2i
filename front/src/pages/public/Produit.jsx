@@ -1,6 +1,7 @@
 import "../../css/Boutique.css";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { addToPanier } from "../../services/panierService";
 
 
 const TABS = [
@@ -149,8 +150,17 @@ const fetchReviews = async () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product, similarBy]);
 
-  const handleAddToCart = () => {
-    
+  const handleAddToCart = async () => {
+    if (!localStorage.getItem("token")) {
+      navigate("/login");
+      return;
+    }
+    try {
+      await addToPanier(Number(id));
+      navigate("/panier");
+    } catch (error) {
+      console.error("Erreur lors de l'ajout au panier", error);
+    }
   };
 
   const handleSubmitReview = async () => {
@@ -487,3 +497,4 @@ const AvisDialog = ({ isOpen, onConfirm, onCancel }) => {
     </div>
   );
 };
+

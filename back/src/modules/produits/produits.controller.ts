@@ -1,23 +1,28 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFiles, UseInterceptors, UseGuards } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { mkdir, writeFile } from 'fs/promises';
 import { randomUUID } from 'crypto';
 import { extname, join } from 'path';
 import { ProduitsService } from './produits.service';
 import { CreateProduitDto } from './dto/create-produit.dto';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @Controller('produits')
 export class ProduitsController {
   constructor(private readonly produitsService: ProduitsService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('medias', 20, { limits: { fileSize: 5 * 1024 * 1024 } }))
   async create(
     @Body() dto: CreateProduitDto,
     @UploadedFiles() files: Array<{ buffer: Buffer; originalname: string; mimetype: string }> = [],
+    @CurrentUser() user?: any,
   ) {
     const medias = await Promise.all(files.map((file, ordre) => this.saveMedia(file, ordre)));
-    return this.produitsService.create(dto, medias);
+    const idUser = user?.id_user;
+    return this.produitsService.create(dto, medias, idUser);
   }
 
   private async saveMedia(file: { buffer: Buffer; originalname: string; mimetype: string }, ordre: number) {
@@ -47,7 +52,7 @@ findSimilarProducts(
     Number(idCategorie),
   );
 }
-
+  @UseGuards(JwtAuthGuard)
   @Get(':id/mes-produits')
   getMesProduits(@Param('id') id: string) {
     return this.produitsService.getMesProduits(+id);
@@ -64,10 +69,19 @@ findSimilarProducts(
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<CreateProduitDto>) {
-    return this.produitsService.update(+id, dto);
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FilesInterceptor('medias', 20, { limits: { fileSize: 5 * 1024 * 1024 } }))
+  async update(
+    @Param('id') id: string,
+    @Body() dto: Partial<CreateProduitDto>,
+    @UploadedFiles() files: Array<{ buffer: Buffer; originalname: string; mimetype: string }> = [],
+    @CurrentUser() user?: any,
+  ) {
+    const medias = await Promise.all(files.map((file, ordre) => this.saveMedia(file, ordre)));
+    return this.produitsService.update(+id, dto, medias, user?.id_user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.produitsService.remove(+id);
