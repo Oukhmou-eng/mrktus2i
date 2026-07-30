@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { mkdir, writeFile } from 'fs/promises';
 import { randomUUID } from 'crypto';
@@ -7,6 +7,8 @@ import { UtilisateursService } from './utilisateurs.service';
 import { CreateUtilisateurDto } from './dto/create-utilisateur.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
 
 @Controller('utilisateurs')
 export class UtilisateursController {
@@ -16,6 +18,39 @@ export class UtilisateursController {
   create(@Body() dto: CreateUtilisateurDto) {
     return this.utilisateursService.create(dto);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('admin')
+  findAllAdmin(
+    @Query('search') search?: string,
+    @Query('role') role?: string,
+    @Query('statut') statut?: string,
+  ) {
+    return this.utilisateursService.findAllAdmin(search, role, statut);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Post('admin')
+  createAdmin(@Body() dto: CreateUtilisateurDto) {
+    return this.utilisateursService.create(dto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch('admin/:id/role')
+  updateRole(@Param('id') id: string, @Body('role') role: string) {
+    return this.utilisateursService.updateRoleByAdmin(+id, role);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch('admin/:id/statut')
+  updateStatut(@Param('id') id: string, @Body('statut') statut: string) {
+    return this.utilisateursService.updateStatutByAdmin(+id, statut);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('me')
   par(@CurrentUser() user: { id_user: number }) {

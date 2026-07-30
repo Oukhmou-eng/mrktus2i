@@ -1,6 +1,7 @@
 import "../../css/Messages.css";
 import { io } from "socket.io-client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getCurrentContext } from "../../store/authStore";
 
 const API_URL = "http://localhost:3000";
@@ -53,9 +54,14 @@ function Messagerie() {
   const [messages, setMessages] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const navigate = useNavigate();
   const [isLoadingConv, setIsLoadingConv] = useState(true);
   const [isLoadingMsgs, setIsLoadingMsgs] = useState(false);
   const [loadError, setLoadError] = useState(null);
+  const [authError, setAuthError] = useState(null);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedConversationId = Number(searchParams.get("conversation")) || null;
 
   const [textInput, setTextInput] = useState("");
   const [stagedFiles, setStagedFiles] = useState([]); // [{ file, previewUrl, type }]
@@ -64,6 +70,7 @@ function Messagerie() {
   const fileInputRef = useRef(null);
   const bodyRef = useRef(null);
   const socketRef = useRef(null);
+  const activeIdRef = useRef(activeId);
 
   const activeConversation =
     conversations.find((c) => c.id_conversation === activeId) || null;
@@ -73,11 +80,40 @@ function Messagerie() {
      ========================================================= */
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setAuthError("Vous devez être connecté pour accéder aux messages.");
+      setIsLoadingConv(false);
+      return;
+    }
+
+    setAuthError(null);
     fetchConversations();
   }, []);
 
   useEffect(() => {
     if (activeId) fetchMessages(activeId);
+  }, [activeId]);
+
+  const joinConversationRoom = (conversationId) => {
+    if (!conversationId || !socketRef.current?.connected) return;
+
+    socketRef.current.emit(
+      "joinConversation",
+      { conversationId },
+      (response) => {
+        if (!response?.success) {
+          console.warn(
+            "Impossible de rejoindre la conversation Socket.IO :",
+            response?.message,
+          );
+        }
+      },
+    );
+  };
+
+  useEffect(() => {
+    activeIdRef.current = activeId;
   }, [activeId]);
 
   useEffect(() => {
@@ -90,12 +126,18 @@ function Messagerie() {
         transports: ["websocket"],
       });
 
+      socket.on("connect", () => {
+        if (activeIdRef.current) {
+          joinConversationRoom(activeIdRef.current);
+        }
+      });
+
       socket.on("connect_error", (error) => {
         console.error("Socket.IO connection error:", error);
       });
 
       socket.on("newMessage", (message) => {
-        if (message?.id_conversation === activeId) {
+        if (message?.id_conversation === activeIdRef.current) {
           setMessages((current) => [...current, message]);
         } else {
           setConversations((current) =>
@@ -122,20 +164,7 @@ function Messagerie() {
   }, []);
 
   useEffect(() => {
-    if (activeId && socketRef.current?.connected) {
-      socketRef.current.emit(
-        "joinConversation",
-        { conversationId: activeId },
-        (response) => {
-          if (!response?.success) {
-            console.warn(
-              "Impossible de rejoindre la conversation Socket.IO :",
-              response?.message,
-            );
-          }
-        },
-      );
-    }
+    joinConversationRoom(activeId);
   }, [activeId]);
 
   useEffect(() => {
@@ -153,15 +182,25 @@ function Messagerie() {
       const res = await fetch(`${API_URL}/messages/conversations`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          throw new Error("Non autorisé. Veuillez vous reconnecter.");
+        }
+        throw new Error(`Erreur HTTP ${res.status}`);
+      }
       const data = await res.json();
       setConversations(data || []);
       if (Array.isArray(data) && data.length > 0) {
-        setActiveId(data[0].id_conversation);
+        const targetId =
+          requestedConversationId &&
+          data.some((conv) => conv.id_conversation === requestedConversationId)
+            ? requestedConversationId
+            : data[0].id_conversation;
+        setActiveId(targetId);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des conversations :", error);
-      setLoadError("Impossible de charger vos conversations pour le moment.");
+      setLoadError(error?.message || "Impossible de charger vos conversations pour le moment.");
     } finally {
       setIsLoadingConv(false);
     }
@@ -308,6 +347,13 @@ function Messagerie() {
 
       {isLoadingConv ? (
         <p className="msgr-loading">Chargement de vos conversations…</p>
+      ) : authError ? (
+        <div className="msgr-error">
+          <p>{authError}</p>
+          <button className="msgr-retry-btn" onClick={() => navigate('/login')}>
+            Se connecter
+          </button>
+        </div>
       ) : loadError ? (
         <div className="msgr-error">
           <p>{loadError}</p>
@@ -413,48 +459,53 @@ function Messagerie() {
                       return (
                         <div
                           key={msg.id_message}
-                          className={`msgr-bubble ${isMine ? "me" : "them"}`}
+                          className={`msgr-bubble-row ${isMine ? "me" : "them"}`}
                         >
-                          {msg.pieces_jointes?.length > 0 && (
-                            <div className="msgr-attachments">
-                              {msg.pieces_jointes.map((piece) =>
-                                piece.type_fichier?.startsWith("video/") ? (
-                                  <video
-                                    key={piece.id_piece_jointe}
-                                    src={piece.url_fichier}
-                                    controls
-                                    className="msgr-attachment-video"
-                                  />
-                                ) : (
-                                  <img
-                                    key={piece.id_piece_jointe}
-                                    src={piece.url_fichier}
-                                    alt={piece.nom_fichier}
-                                    className="msgr-attachment-image"
-                                  />
-                                ),
+                          <div className={`msgr-bubble ${isMine ? "me" : "them"}`}>
+                            <div className="msgr-bubble-sender">
+                              {isMine ? "Vous" : isBoutique ? "Client" : "Boutique"}
+                            </div>
+                            {msg.pieces_jointes?.length > 0 && (
+                              <div className="msgr-attachments">
+                                {msg.pieces_jointes.map((piece) =>
+                                  piece.type_fichier?.startsWith("video/") ? (
+                                    <video
+                                      key={piece.id_piece_jointe}
+                                      src={piece.url_fichier}
+                                      controls
+                                      className="msgr-attachment-video"
+                                    />
+                                  ) : (
+                                    <img
+                                      key={piece.id_piece_jointe}
+                                      src={piece.url_fichier}
+                                      alt={piece.nom_fichier}
+                                      className="msgr-attachment-image"
+                                    />
+                                  ),
+                                )}
+                              </div>
+                            )}
+
+                            {msg.contenu && (
+                              <div className="msgr-bubble-text">
+                                {msg.contenu}
+                              </div>
+                            )}
+
+                            <div className="msgr-bubble-meta">
+                              <time
+                                className="msgr-bubble-time"
+                                dateTime={msg.date_creation}
+                              >
+                                {formatTime(msg.date_creation)}
+                              </time>
+                              {isMine && (
+                                <span className="msgr-bubble-status">
+                                  {statusIcon(msg.statut_lecture)}
+                                </span>
                               )}
                             </div>
-                          )}
-
-                          {msg.contenu && (
-                            <div className="msgr-bubble-text">
-                              {msg.contenu}
-                            </div>
-                          )}
-
-                          <div className="msgr-bubble-meta">
-                            <time
-                              className="msgr-bubble-time"
-                              dateTime={msg.date_creation}
-                            >
-                              {formatTime(msg.date_creation)}
-                            </time>
-                            {isMine && (
-                              <span className="msgr-bubble-status">
-                                {statusIcon(msg.statut_lecture)}
-                              </span>
-                            )}
                           </div>
                         </div>
                       );

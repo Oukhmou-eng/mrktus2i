@@ -30,7 +30,134 @@
 .directory-shops__empty > span { color: var(--teal); font-size: 32px; }
 .directory-shops__empty h2 { margin: 12px 0 8px; color: var(--ink); font-size: 18px; }
 .directory-shops__empty p { margin: 0; font-size: 13px; }
-@media (max-width: 620px) { .directory-shops-page { padding: 24px 20px 48px; } .directory-shops__tools, .directory-shop-card { align-items: stretch; flex-direction: column; } .directory-shops__sort { justify-content: space-between; } .directory-shop-card__actions { display: grid; grid-template-columns: 1fr 1fr; } .directory-shop-card .btn, .directory-shop-card__follow { width: 100%; } }
+@media (max-width: 620px) { .directory-shops-page { padding: 24px 20px 48px; } .directory-shops__tools, .directory-shop-card { align-items: stretch; flex-direction: column; } .directory-shops__sort { justify-content: space-between; } .directory-shop-card__actions { display: grid; grid-template-columns: 1fr 1fr; } .directory-shop-card .btn, .directory-shop-card__follow { width: 100%; } .directory-shops__form { padding: 18px; } .directory-shops__grid { grid-template-columns: 1fr; } .directory-shops__actions--form { flex-direction: column; } }
+
+.directory-shops__panel {
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(54, 91, 78, 0.16);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #f7fbf7 0%, #ffffff 100%);
+  box-shadow: 0 12px 30px rgba(24, 91, 68, 0.08);
+}
+
+.directory-shops__panel-header {
+  margin-bottom: 20px;
+}
+
+.directory-shops__panel-title {
+  margin: 0 0 6px;
+  font-size: 20px;
+  color: var(--ink);
+}
+
+.directory-shops__panel-copy {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.directory-shops__form {
+  display: grid;
+  gap: 18px;
+  padding: 18px 0 0;
+}
+
+.directory-shops__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.directory-shops__field {
+  display: grid;
+  gap: 8px;
+}
+
+.directory-shops__input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 14px;
+  background: #fff;
+  color: var(--ink);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.directory-shops__input:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 4px rgba(22, 120, 93, 0.08);
+}
+
+.directory-shops__actions--form {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.directory-shops__form label {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.directory-shops__input[type="search"] {
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  .directory-shops__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.directory-shops__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 28, 21, 0.55);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.directory-shops__modal {
+  width: min(100%, 760px);
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  padding: 28px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbf8 100%);
+  box-shadow: 0 24px 72px rgba(13, 30, 23, 0.25);
+}
+
+.directory-shops__modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.directory-shops__modal-header h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.directory-shops__modal-header p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.directory-shops__modal button {
+  white-space: nowrap;
+}
+
 .dialog-overlay {
   position: fixed;
   inset: 0;

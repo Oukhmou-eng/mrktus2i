@@ -5,13 +5,42 @@ import { DatabaseService } from '../../database/database.service';
 
 @Injectable()
 export class UtilisateursService {
-     constructor(private readonly db: DatabaseService) {}
-  create(dto: CreateUtilisateurDto) {
-    // TODO: this.prisma.utilisateurs.create({ data: dto })
-    return dto;
+  constructor(private readonly db: DatabaseService) {}
+
+  async create(dto: CreateUtilisateurDto) {
+    const { prenom, nom, email, password, tele, role, statut } = dto;
+
+    if (!prenom?.trim() || !nom?.trim() || !email?.trim() || !password) {
+      throw new BadRequestException('Prénom, nom, email et mot de passe sont requis.');
+    }
+
+    const existing = await this.db.query('SELECT id_user FROM utilisateurs WHERE email = ?', [email.trim()]);
+    if (existing?.length > 0) {
+      throw new BadRequestException('Cet email est déjà utilisé.');
+    }
+
+    const normalizedRole = role?.toLowerCase() === 'admin' ? 'admin' : 'user';
+    const normalizedStatut = statut === 'suspendu' ? 'suspendu' : 'actif';
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const result: any = await this.db.query(
+      `INSERT INTO utilisateurs (nom, prenom, email, password, tele, role, statut, date_creation)
+       VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [nom.trim(), prenom.trim(), email.trim(), hashedPassword, tele?.trim() || null, normalizedRole, normalizedStatut],
+    );
+
+    return {
+      id_user: result?.insertId ?? null,
+      prenom: prenom.trim(),
+      nom: nom.trim(),
+      email: email.trim(),
+      tele: tele?.trim() || null,
+      role: normalizedRole,
+      statut: normalizedStatut,
+    };
   }
 
-async par(id: number) {
+  async par(id: number) {
   try {
     const users = await this.db.query(
       `
@@ -42,12 +71,44 @@ async par(id: number) {
   }
 }
 
-  findAll() {
-    // TODO: this.prisma.utilisateurs.findMany()
-    return [];
+  async findAll() {
+    return this.findAllAdmin();
   }
 
-  findOne(id: number) {
+  async findAllAdmin(search = '', role = '', statut = '') {
+    const conditions = ['1=1'];
+    const params: any[] = [];
+
+    if (search?.trim()) {
+      conditions.push(`(prenom LIKE ? OR nom LIKE ? OR email LIKE ?)`);
+      const term = `%${search.trim()}%`;
+      params.push(term, term, term);
+    }
+
+    if (role) {
+      const normalizedRole = role.toLowerCase() === 'admin' ? 'admin' : 'user';
+      conditions.push('role = ?');
+      params.push(normalizedRole);
+    }
+
+    if (statut) {
+      const normalizedStatut = statut === 'suspendu' ? 'suspendu' : 'actif';
+      conditions.push('statut = ?');
+      params.push(normalizedStatut);
+    }
+
+    const users = await this.db.query(
+      `SELECT id_user, prenom, nom, email, tele, logo_url, role, statut, date_creation
+       FROM utilisateurs
+       WHERE ${conditions.join(' AND ')}
+       ORDER BY date_creation DESC`,
+      params,
+    );
+
+    return { users: users ?? [] };
+  }
+
+  async findOne(id: number) {
     // TODO: this.prisma.utilisateurs.findUnique({ where: { id } })
     return { id };
   }
@@ -120,6 +181,24 @@ async par(id: number) {
     );
     return this.par(id);
   }
+  async updateRoleByAdmin(id: number, role: string) {
+    const normalizedRole = role?.toLowerCase() === 'admin' ? 'admin' : 'user';
+    const result: any = await this.db.query(
+      'UPDATE utilisateurs SET role = ? WHERE id_user = ?',
+      [normalizedRole, id],
+    );
+    return { success: result?.affectedRows > 0, role: normalizedRole };
+  }
+
+  async updateStatutByAdmin(id: number, statut: string) {
+    const normalizedStatut = statut === 'suspendu' ? 'suspendu' : 'actif';
+    const result: any = await this.db.query(
+      'UPDATE utilisateurs SET statut = ? WHERE id_user = ?',
+      [normalizedStatut, id],
+    );
+    return { success: result?.affectedRows > 0, statut: normalizedStatut };
+  }
+
   update(id: number, dto: Partial<CreateUtilisateurDto>) {
     // TODO: this.prisma.utilisateurs.update({ where: { id }, data: dto })
     return { id, ...dto };

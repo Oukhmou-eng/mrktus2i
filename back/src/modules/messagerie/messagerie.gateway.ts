@@ -37,7 +37,12 @@ export class MessagerieGateway implements OnGatewayConnection, OnGatewayDisconne
       const payload = this.jwtService.verify(token, {
         secret: process.env.JWT_SECRET ?? 'default_jwt_secret',
       });
-      client.data.user = payload;
+      client.data.user = {
+        id_user: payload.id_user ?? payload.sub,
+        id_boutique: payload.id_boutique ?? null,
+        role: payload.role ?? null,
+        email: payload.email ?? null,
+      };
     } catch (error) {
       client.disconnect(true);
     }

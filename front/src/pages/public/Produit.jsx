@@ -24,6 +24,8 @@ function Produit() {
   const [similarBy, setSimilarBy] = useState("categorie");
   const [similarProducts, setSimilarProducts] = useState([]);
   const [showAvisDialog, setShowAvisDialog] = useState(false);
+  const [isContactingSeller, setIsContactingSeller] = useState(false);
+  const [contactError, setContactError] = useState(null);
 
 
 
@@ -210,9 +212,48 @@ const fetchReviews = async () => {
     }
   };
 
-  // TODO: implémenter le contact vendeur (ouvrir un chat, une modale, etc.)
-  const handleContactSeller = () => {
-    // TODO
+  const handleContactSeller = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (!product?.shopId) {
+      setContactError("Impossible de contacter le vendeur : boutique non trouvée.");
+      return;
+    }
+
+    setIsContactingSeller(true);
+    setContactError(null);
+
+    try {
+      const res = await fetch("http://localhost:3000/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          id_boutique: Number(product.shopId),
+          contenu: "Bonjour, je souhaite en savoir plus sur ce produit.",
+          type_message: "texte",
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Erreur HTTP ${res.status}`);
+      }
+
+      const createdMessage = await res.json();
+      navigate(`/messages?conversation=${createdMessage.id_conversation}`);
+    } catch (error) {
+      console.error("Erreur lors de la prise de contact :", error);
+      setContactError(error.message || "Impossible de contacter le vendeur.");
+    } finally {
+      setIsContactingSeller(false);
+    }
   };
 
   const handleGoToShop = () => {

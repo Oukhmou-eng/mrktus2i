@@ -1,6 +1,7 @@
-import '../css/Messagerie.css';
+import '../../css/Messages.css';
+import { io } from 'socket.io-client';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { getCurrentContext } from '../store/authStore';
+import { getCurrentContext } from '../../store/authStore';
 
 const API_URL = 'http://localhost:3000';
 
@@ -16,6 +17,8 @@ function MessagesVendeur() {
   const [textInput, setTextInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const bodyRef = useRef(null);
+  const socketRef = useRef(null);
+  const activeIdRef = useRef(activeId);
 
   const activeConversation = conversations.find((c) => c.id_conversation === activeId) || null;
 
@@ -25,6 +28,71 @@ function MessagesVendeur() {
 
   useEffect(() => {
     if (activeId) fetchMessages(activeId);
+  }, [activeId]);
+
+  useEffect(() => {
+    activeIdRef.current = activeId;
+  }, [activeId]);
+
+  useEffect(() => {
+    if (!socketRef.current) {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const socket = io(API_URL, {
+        auth: { token },
+        transports: ['websocket'],
+      });
+
+      socket.on('connect_error', (error) => {
+        console.error('Socket.IO connection error:', error);
+      });
+
+      socket.on('connect', () => {
+        if (activeIdRef.current) {
+          socket.emit('joinConversation', { conversationId: activeIdRef.current }, (response) => {
+            if (!response?.success) {
+              console.warn('Impossible de rejoindre la conversation Socket.IO :', response?.message);
+            }
+          });
+        }
+      });
+
+      socket.on('newMessage', (message) => {
+        if (message?.id_conversation === activeIdRef.current) {
+          setMessages((current) => [...current, message]);
+        } else {
+          setConversations((current) =>
+            current.map((conv) =>
+              conv.id_conversation === message.id_conversation
+                ? {
+                    ...conv,
+                    dernier_message: message.contenu,
+                    dernier_message_date: message.date_creation,
+                  }
+                : conv,
+            ),
+          );
+        }
+      });
+
+      socketRef.current = socket;
+    }
+
+    return () => {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (socketRef.current?.connected && activeId) {
+      socketRef.current.emit('joinConversation', { conversationId: activeId }, (response) => {
+        if (!response?.success) {
+          console.warn('Impossible de rejoindre la conversation Socket.IO :', response?.message);
+        }
+      });
+    }
   }, [activeId]);
 
   useEffect(() => {
@@ -76,18 +144,33 @@ function MessagesVendeur() {
     if (!contenu || !activeId) return;
     setIsSending(true);
     try {
-      const res = await fetch(`${API_URL}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({ id_conversation: activeId, contenu }),
-      });
-      if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
-      const savedMessage = await res.json();
-      setMessages((current) => [...current, savedMessage]);
-      setTextInput('');
+      if (socketRef.current?.connected) {
+        socketRef.current.emit(
+          'sendMessage',
+          { id_conversation: activeId, contenu, type_message: 'texte' },
+          (response) => {
+            if (response?.success) {
+              setMessages((current) => [...current, response.message]);
+              setTextInput('');
+            } else {
+              console.error('Erreur Socket.IO sendMessage:', response?.message);
+            }
+          },
+        );
+      } else {
+        const res = await fetch(`${API_URL}/messages`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify({ id_conversation: activeId, contenu }),
+        });
+        if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
+        const savedMessage = await res.json();
+        setMessages((current) => [...current, savedMessage]);
+        setTextInput('');
+      }
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message :', error);
     } finally {
@@ -179,11 +262,16 @@ function MessagesVendeur() {
                     messages.map((msg) => {
                       const isMine = msg.id_user === idUser;
                       return (
-                        <div key={msg.id_message} className={`msgr-bubble ${isMine ? 'me' : 'them'}`}>
-                          {msg.contenu && <div className="msgr-bubble-text">{msg.contenu}</div>}
-                          <div className="msgr-bubble-meta">
-                            <time className="msgr-bubble-time" dateTime={msg.date_creation}>{formatTime(msg.date_creation)}</time>
-                            {isMine && <span className="msgr-bubble-status">{statusIcon(msg.statut_lecture)}</span>}
+                        <div key={msg.id_message} className={`msgr-bubble-row ${isMine ? 'me' : 'them'}`}>
+                          <div className={`msgr-bubble ${isMine ? 'me' : 'them'}`}>
+                            <div className="msgr-bubble-sender">
+                              {isMine ? 'Vous' : 'Client'}
+                            </div>
+                            {msg.contenu && <div className="msgr-bubble-text">{msg.contenu}</div>}
+                            <div className="msgr-bubble-meta">
+                              <time className="msgr-bubble-time" dateTime={msg.date_creation}>{formatTime(msg.date_creation)}</time>
+                              {isMine && <span className="msgr-bubble-status">{statusIcon(msg.statut_lecture)}</span>}
+                            </div>
                           </div>
                         </div>
                       );

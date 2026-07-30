@@ -23,3 +23,13 @@ SIGNALEMENTS (id, #utilisateur_id, type_cible, #cible_id, motif, description, st
 NOTIFICATIONS (id, #utilisateur_id, type, contenu, lien, lu, date_creation)
 PUBLICITES (id, #boutique_id, #produit_id, budget, cout_par_clic, impressions, clics, statut, date_debut, date_fin)
 REVENUS_VENDEUR (id, #boutique_id, #commande_ligne_id, montant_brut, commission, montant_net, statut, date)
+PLANS_TARIFS (id, nom_plan, type_cible, duree_jours, prix, priorite, statut, modifie_par, date_creation, date_maj)
+
+PROMOUVOIR (id, produit_id, plan_tarif_id, priorite, date_debut, date_fin, statut, date_creation)
+
+FACTURES_BOUTIQUE (id, boutique_id, type_facture, reference_id, moyen_paiement_id, montant, statut, reference_transaction, date_facture, date_paiement)
+
+MOYENS_PAIEMENT (id, utilisateur_id, fournisseur, type, jeton_paiement, derniers_chiffres, date_expiration, est_defaut, date_creation)
+
+PRODUITS (id, boutique_id, categorie_id, nom, prix, stock, statut)
+infoboutique(id, id_boutique, adresse,tele , emailprof , instagram , facebook)

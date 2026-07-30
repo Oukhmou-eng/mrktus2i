@@ -1,11 +1,14 @@
-﻿import { IsIn, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+﻿import { Type } from 'class-transformer';
+import { IsIn, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateMessageDto {
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   id_conversation?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   id_boutique?: number;
 

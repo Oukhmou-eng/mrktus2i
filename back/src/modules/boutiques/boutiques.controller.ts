@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { mkdir, writeFile } from 'fs/promises';
 import { extname, join } from 'path';
@@ -7,6 +7,9 @@ import { BoutiquesService } from './boutiques.service';
 import { CreateBoutiqueDto } from './dto/create-boutique.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
 
 @Controller('boutiques')
 export class BoutiquesController {
@@ -170,9 +173,50 @@ checkFollow(
     return this.boutiquesService.ajouterAvis(+id, body.note, body.commentaire, user.id_user);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('admin/boutiques')
+  getAdminBoutiques(@CurrentUser() user: { id_user: number }) {
+    return this.boutiquesService.findAllAdmin();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch('admin/:id/status')
+  updateBoutiqueStatus(
+    @Param('id') id: string,
+    @Body('statut') statut: string,
+  ) {
+    return this.boutiquesService.updateStatusByAdmin(+id, statut);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<CreateBoutiqueDto>) {
-    return this.boutiquesService.update(+id, dto);
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'logo', maxCount: 1 },
+    { name: 'banniere', maxCount: 1 },
+  ], { limits: { fileSize: 5 * 1024 * 1024 } }))
+  async update(
+    @CurrentUser() user: { id_user: number },
+    @Param('id') id: string,
+    @Body() body: any,
+    @UploadedFiles() files: Record<string, Array<{ buffer: Buffer; originalname: string; mimetype: string }>>,
+  ) {
+    const dto: Partial<CreateBoutiqueDto> = {
+      nom: body.nom,
+      description: body.description,
+      adresse: body.adresse,
+      tele: body.tele,
+      emailprof: body.emailprof,
+      instagram: body.instagram,
+      facebook: body.facebook,
+    };
+
+    const logoUrl = await this.saveImage(files?.logo?.[0], 'logo');
+    const banniereUrl = await this.saveImage(files?.banniere?.[0], 'banniere');
+    if (logoUrl) dto.logo_url = logoUrl;
+    if (banniereUrl) dto.banniere_url = banniereUrl;
+    return this.boutiquesService.update(+id, user.id_user, dto);
   }
 
   @Delete(':id')

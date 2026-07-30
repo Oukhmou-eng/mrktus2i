@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto';
 import { extname, join } from 'path';
 import { ProduitsService } from './produits.service';
 import { CreateProduitDto } from './dto/create-produit.dto';
+import { CreateSoldeDto } from './dto/create-solde.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
@@ -66,6 +67,16 @@ findSimilarProducts(
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.produitsService.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/solde')
+  createSolde(
+    @Param('id') id: string,
+    @Body() dto: CreateSoldeDto,
+    @CurrentUser() user?: any,
+  ) {
+    return this.produitsService.createSolde(+id, dto, user?.id_user);
   }
 
   @Patch(':id')

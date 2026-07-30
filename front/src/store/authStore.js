@@ -33,7 +33,7 @@ export function getCurrentContext() {
   if (!payload) return { idUser: null, idBoutique: null, isBoutique: false };
 
   return {
-    idUser: payload.id_user ?? null,
+    idUser: payload.id_user ?? payload.sub ?? null,
     idBoutique: payload.id_boutique ?? null,
     isBoutique: Boolean(payload.id_boutique),
   };

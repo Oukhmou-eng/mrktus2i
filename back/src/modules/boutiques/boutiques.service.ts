@@ -1,4 +1,4 @@
-﻿import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+﻿import { BadRequestException, ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { CreateBoutiqueDto } from './dto/create-boutique.dto';
 import { DatabaseService } from '../../database/database.service';
@@ -79,6 +79,58 @@ GROUP BY
      catch (error) {
       console.error('Erreur getBoutiques:', error);
       return { boutiques: [] };
+    }
+  }
+
+  async findAllAdmin() {
+    try {
+      const boutiques = await this.db.query(`
+     SELECT
+    b.id_boutique,
+    b.nom,
+    b.slug,
+    b.logo_url,
+    b.note_moyenne,
+    b.estVerifier,
+    b.statut,
+    COUNT(p.id_produit) AS nbr_produits
+FROM boutiques b
+LEFT JOIN produits p
+    ON p.id_boutique = b.id_boutique
+    AND p.statut = 'en_ligne'
+WHERE b.statut IN ('actif','suspendu')
+GROUP BY
+    b.id_boutique,
+    b.nom,
+    b.slug,
+    b.logo_url,
+    b.note_moyenne,
+    b.estVerifier,
+    b.statut
+ORDER BY b.nom ASC
+      `);
+      return { boutiques: boutiques ?? [] };
+    } catch (error) {
+      console.error('Erreur getBoutiquesAdmin:', error);
+      return { boutiques: [] };
+    }
+  }
+
+  async updateStatusByAdmin(id: number, statut: string) {
+    const allowedStatuses = ['actif', 'suspendu'];
+    if (!allowedStatuses.includes(statut)) {
+      throw new BadRequestException('Statut invalide.');
+    }
+
+    try {
+      const result: any = await this.db.query(
+        'UPDATE boutiques SET statut = ? WHERE id_boutique = ?',
+        [statut, id],
+      );
+      return { success: result?.affectedRows > 0 };
+    } catch (error) {
+      console.error('Erreur updateStatusByAdmin:', error);
+      return { success: false, message: 'Impossible de mettre à jour le statut.' };
     }
   }
 
@@ -213,13 +265,35 @@ async getMesBoutiques(id_user: number) {
   return { boutiques };
 }
 async getMesBoutiquesid(id_user: number, id: number ) {
-  const boutiques = await this.db.query(`
-    SELECT * FROM 
-    boutiques 
-    WHERE id_user =  ? AND id_boutique = ?
-    
-    `, [id_user, id ] );
-  return { boutiques };
+  try {
+    const boutiques = await this.db.query(`
+      SELECT
+        b.id_boutique,
+        b.id_user,
+        b.nom,
+        b.slug,
+        b.description,
+        b.logo_url,
+        b.banniere_url,
+        b.statut,
+        b.note_moyenne,
+        b.nbr_abonnes,
+        b.date_creation,
+        b.estVerifier,
+        i.adresse,
+        i.tele,
+        i.emailprof,
+        i.instagram,
+        i.facebook
+      FROM boutiques b
+      LEFT JOIN infoboutique i ON i.id_boutique = b.id_boutique
+      WHERE b.id_user = ? AND b.id_boutique = ?
+    `, [id_user, id]);
+    return { boutiques };
+  } catch (error) {
+    console.error('Erreur getMesBoutiquesid:', error);
+    return { boutiques: [] };
+  }
 }
 
 
@@ -329,17 +403,110 @@ GROUP BY
 
 
 
-  update(id: number, dto: Partial<CreateBoutiqueDto>) {
-    // TODO: this.prisma.boutiques.update({ where: { id }, data: dto })
-    return { id, ...dto };
+async update(id: number, userId: number, dto: Partial<CreateBoutiqueDto>) {
+    const connection = await this.db.getPool().getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const [rows] = await connection.execute<RowDataPacket[]>(
+        'SELECT id_boutique, id_user FROM boutiques WHERE id_boutique = ?',
+        [id],
+      );
+      const boutique = rows[0];
+      if (!boutique) {
+        throw new BadRequestException('Boutique introuvable.');
+      }
+      if (boutique.id_user !== userId) {
+        throw new ForbiddenException('Vous ne pouvez pas modifier cette boutique.');
+      }
+
+      const boutiqueFields: string[] = [];
+      const boutiqueValues: any[] = [];
+      if (dto.nom !== undefined) {
+        boutiqueFields.push('nom = ?');
+        boutiqueValues.push(dto.nom.trim());
+      }
+      if (dto.description !== undefined) {
+        boutiqueFields.push('description = ?');
+        boutiqueValues.push(dto.description?.trim() || null);
+      }
+      if (dto.logo_url !== undefined) {
+        boutiqueFields.push('logo_url = ?');
+        boutiqueValues.push(dto.logo_url?.trim() || null);
+      }
+      if (dto.banniere_url !== undefined) {
+        boutiqueFields.push('banniere_url = ?');
+        boutiqueValues.push(dto.banniere_url?.trim() || null);
+      }
+
+      if (boutiqueFields.length > 0) {
+        await connection.execute(
+          `UPDATE boutiques SET ${boutiqueFields.join(', ')} WHERE id_boutique = ?`,
+          [...boutiqueValues, id],
+        );
+      }
+
+      const infoFields: string[] = [];
+      const infoValues: any[] = [];
+      if (dto.adresse !== undefined) {
+        infoFields.push('adresse = ?');
+        infoValues.push(dto.adresse?.trim() || null);
+      }
+      if (dto.tele !== undefined) {
+        infoFields.push('tele = ?');
+        infoValues.push(dto.tele?.trim() || null);
+      }
+      if (dto.emailprof !== undefined) {
+        infoFields.push('emailprof = ?');
+        infoValues.push(dto.emailprof?.trim() || null);
+      }
+      if (dto.instagram !== undefined) {
+        infoFields.push('instagram = ?');
+        infoValues.push(dto.instagram?.trim() || null);
+      }
+      if (dto.facebook !== undefined) {
+        infoFields.push('facebook = ?');
+        infoValues.push(dto.facebook?.trim() || null);
+      }
+
+      if (infoFields.length > 0) {
+        const [infoRows] = await connection.execute<RowDataPacket[]>(
+          'SELECT id FROM infoboutique WHERE id_boutique = ?',
+          [id],
+        );
+
+        if (infoRows.length > 0) {
+          await connection.execute(
+            `UPDATE infoboutique SET ${infoFields.join(', ')} WHERE id_boutique = ?`,
+            [...infoValues, id],
+          );
+        } else {
+          await connection.execute(
+            `INSERT INTO infoboutique (id_boutique, adresse, tele, emailprof, instagram, facebook)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+              id,
+              dto.adresse?.trim() || null,
+              dto.tele?.trim() || null,
+              dto.emailprof?.trim() || null,
+              dto.instagram?.trim() || null,
+              dto.facebook?.trim() || null,
+            ],
+          );
+        }
+      }
+
+      await connection.commit();
+      return { success: true };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   remove(id: number) {
-  
-  
-
-
-
     return { id };
   }
 

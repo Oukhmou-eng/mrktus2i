@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { CreateProduitDto } from './dto/create-produit.dto';
+import { CreateSoldeDto } from './dto/create-solde.dto';
 import { DatabaseService } from '../../database/database.service';
 
 
@@ -315,5 +316,48 @@ async findSimilarProducts(shopId: number, idCategorie: number) {
 
 
 
+
+  async createSolde(idProduit: number, dto: CreateSoldeDto, idUser?: number) {
+    const connection = await this.db.getPool().getConnection();
+    try {
+      await connection.beginTransaction();
+
+      if (typeof idUser !== 'number') {
+        throw new BadRequestException('Utilisateur non authentifié.');
+      }
+
+      const [owned] = await connection.execute<(RowDataPacket & { id_boutique: number })[]>(
+        `SELECT p.id_boutique FROM produits p
+         INNER JOIN boutiques b ON b.id_boutique = p.id_boutique
+         WHERE p.id_produit = ? AND b.id_user = ? LIMIT 1`,
+        [idProduit, idUser],
+      );
+      if (!owned.length) throw new BadRequestException('Produit introuvable ou accès non autorisé.');
+
+      const debut = new Date(dto.date_debut);
+      const fin = new Date(dto.date_fin);
+      if (isNaN(debut.getTime()) || isNaN(fin.getTime()) || debut >= fin) {
+        throw new BadRequestException('Dates invalides pour le solde.');
+      }
+
+      if (dto.prix_promo < 0 || dto.valeur_reduction < 0) {
+        throw new BadRequestException('Valeurs de réduction invalides.');
+      }
+
+      const [result] = await connection.execute<ResultSetHeader>(
+        `INSERT INTO soldes (id_produit, type_reduction, valeur_reduction, prix_promo, date_debut, date_fin, statut)
+         VALUES (?, ?, ?, ?, ?, ?, 'active')`,
+        [idProduit, dto.type_reduction, dto.valeur_reduction, dto.prix_promo, dto.date_debut, dto.date_fin],
+      );
+
+      await connection.commit();
+      return { id_solde: result.insertId, id_produit: idProduit, statut: 'en_attente' };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
 
 }

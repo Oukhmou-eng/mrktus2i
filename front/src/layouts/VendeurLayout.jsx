@@ -102,6 +102,12 @@ function VendeurSidebar() {
         </NavLink>
         <NavLink
           className={({ isActive }) => `snav-item ${isActive ? 'active' : ''}`}
+          to="/publicites"
+        >
+          <span className="ic">🚀</span>Publicités
+        </NavLink>
+        <NavLink
+          className={({ isActive }) => `snav-item ${isActive ? 'active' : ''}`}
           to="/commandes-recues"
         >
           <span className="ic">📑</span>Commandes reçues
@@ -120,7 +126,7 @@ function VendeurSidebar() {
         </NavLink>
         <NavLink
           className={({ isActive }) => `snav-item ${isActive ? 'active' : ''}`}
-          to="/messages"
+          to="/messages-vendeur"
         >
           <span className="ic">💬</span>Messages
         </NavLink>

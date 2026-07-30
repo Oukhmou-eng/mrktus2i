@@ -47,7 +47,7 @@ export class MessagerieService {
       ORDER BY latest.date_creation DESC
     `;
 
-    const params = isBoutiqueView ? [userId, boutiqueId] : [userId];
+    const params = isBoutiqueView ? [userId, boutiqueId as number] : [userId, userId];
     const rows = (await this.db.query<any[]>(query, params)) ?? [];
 
     return rows.map((row) => ({
@@ -137,10 +137,28 @@ export class MessagerieService {
     }
 
     let conversation: any;
-    if (payload.id_conversation) {
-      conversation = await this.validateConversationAccess(payload.id_conversation, authorId, boutiqueId);
-    } else if (payload.id_boutique) {
-      conversation = await this.findOrCreateConversation(authorId, payload.id_boutique);
+    const hasConversationId =
+      payload.id_conversation != null &&
+      Number.isInteger(payload.id_conversation) &&
+      payload.id_conversation > 0;
+    const hasBoutiqueId =
+      payload.id_boutique != null &&
+      Number.isInteger(payload.id_boutique) &&
+      payload.id_boutique > 0;
+
+    if (hasConversationId) {
+      const conversationId = payload.id_conversation as number;
+      conversation = await this.validateConversationAccess(
+        conversationId,
+        authorId,
+        boutiqueId,
+      );
+    } else if (hasBoutiqueId) {
+      const targetBoutiqueId = payload.id_boutique as number;
+      conversation = await this.findOrCreateConversation(
+        authorId,
+        targetBoutiqueId,
+      );
     } else {
       throw new BadRequestException('id_conversation ou id_boutique requis.');
     }
